@@ -54,10 +54,13 @@ export async function POST(request: NextRequest) {
   const styleGuide = STYLE_INSTRUCTIONS[style as Style] ?? STYLE_INSTRUCTIONS.balanced;
 
   try {
-    const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const openai = createOpenAI({
+      apiKey: process.env.VERCEL_API_KEY,
+      baseURL: 'https://api.vercel.ai/v1',
+    });
 
     const { object } = await generateObject({
-      model: openai('gpt-4o-mini'),
+      model: openai('openai/gpt-4o-mini'),
       schema: flashcardsSchema,
       system: `You are a flashcard generator for medical students (and general learners). Extract key concepts from the given text and create flashcards.
 
