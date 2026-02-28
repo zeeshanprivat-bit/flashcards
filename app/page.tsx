@@ -4,7 +4,7 @@ import LoginForm from './LoginForm';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Background Pattern */}
@@ -62,7 +62,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white/50">
+      <section className="py-24 bg-gradient-to-br from-indigo-50 to-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">
@@ -115,7 +115,7 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="py-24">
+      <section className="py-24 bg-gradient-to-br from-emerald-50 to-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">
@@ -162,7 +162,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-white/50">
+      <section className="py-24 bg-gradient-to-br from-amber-50 to-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">

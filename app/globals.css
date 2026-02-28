@@ -2,19 +2,19 @@
 
 @layer base {
   :root {
-    /* Modern color system */
-    --color-primary: 0 84% 60%;
+    /* Modern color system - more vibrant */
+    --color-primary: 262 83% 58%;
     --color-primary-foreground: 0 0% 98%;
-    --color-secondary: 0 0% 96%;
-    --color-secondary-foreground: 0 0% 9%;
+    --color-secondary: 220 14% 96%;
+    --color-secondary-foreground: 220 9% 46%;
     --color-background: 0 0% 100%;
-    --color-foreground: 0 0% 3%;
-    --color-muted: 0 0% 96%;
-    --color-muted-foreground: 0 0% 45%;
-    --color-border: 0 0% 90%;
-    --color-input: 0 0% 90%;
-    --color-ring: 0 84% 60%;
-    --color-success: 142 76% 36%;
+    --color-foreground: 222 84% 5%;
+    --color-muted: 220 14% 96%;
+    --color-muted-foreground: 220 9% 46%;
+    --color-border: 220 13% 91%;
+    --color-input: 220 13% 91%;
+    --color-ring: 262 83% 58%;
+    --color-success: 142 71% 45%;
     --color-warning: 38 92% 50%;
     --color-error: 0 84% 60%;
     

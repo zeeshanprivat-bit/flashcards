@@ -33,7 +33,7 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
   const allCaughtUp = decks.length > 0 && totalDue === 0 && totalCards > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       <Navbar email={email} />
 
       <main className="container mx-auto px-4 py-8">
@@ -45,48 +45,48 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="card p-6">
+          <div className="card p-6 bg-gradient-to-br from-purple-50 to-white border-purple-200">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-primary" />
+              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-purple-600" />
               </div>
-              <span className="text-2xl font-bold text-foreground">{decks.length}</span>
+              <span className="text-2xl font-bold text-purple-700">{decks.length}</span>
             </div>
-            <h3 className="font-semibold text-foreground">Kortstokker</h3>
-            <p className="text-sm text-muted-foreground">Totalt antall</p>
+            <h3 className="font-semibold text-purple-900">Kortstokker</h3>
+            <p className="text-sm text-purple-600">Totalt antall</p>
           </div>
 
-          <div className="card p-6">
+          <div className="card p-6 bg-gradient-to-br from-emerald-50 to-white border-emerald-200">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-success" />
+              <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6 text-emerald-600" />
               </div>
-              <span className="text-2xl font-bold text-foreground">{totalCards}</span>
+              <span className="text-2xl font-bold text-emerald-700">{totalCards}</span>
             </div>
-            <h3 className="font-semibold text-foreground">Totalt kort</h3>
-            <p className="text-sm text-muted-foreground">I alle kortstokker</p>
+            <h3 className="font-semibold text-emerald-900">Totalt kort</h3>
+            <p className="text-sm text-emerald-600">I alle kortstokker</p>
           </div>
 
-          <div className="card p-6">
+          <div className="card p-6 bg-gradient-to-br from-amber-50 to-white border-amber-200">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-warning" />
+              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-amber-600" />
               </div>
-              <span className="text-2xl font-bold text-foreground">{totalDue}</span>
+              <span className="text-2xl font-bold text-amber-700">{totalDue}</span>
             </div>
-            <h3 className="font-semibold text-foreground">Klar for repetisjon</h3>
-            <p className="text-sm text-muted-foreground">Kort som forfaller i dag</p>
+            <h3 className="font-semibold text-amber-900">Klar for repetisjon</h3>
+            <p className="text-sm text-amber-600">Kort som forfaller i dag</p>
           </div>
 
-          <div className="card p-6">
+          <div className="card p-6 bg-gradient-to-br from-rose-50 to-white border-rose-200">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-error/10 flex items-center justify-center">
-                <Flame className="w-6 h-6 text-error" />
+              <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center">
+                <Flame className="w-6 h-6 text-rose-600" />
               </div>
-              <span className="text-2xl font-bold text-foreground">{decksWithDue.length}</span>
+              <span className="text-2xl font-bold text-rose-700">{decksWithDue.length}</span>
             </div>
-            <h3 className="font-semibold text-foreground">Aktive kortstokker</h3>
-            <p className="text-sm text-muted-foreground">Med forfallende kort</p>
+            <h3 className="font-semibold text-rose-900">Aktive kortstokker</h3>
+            <p className="text-sm text-rose-600">Med forfallende kort</p>
           </div>
         </div>
 
