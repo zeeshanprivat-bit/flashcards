@@ -41,7 +41,7 @@ export default function StudyClient({ deck, dueCards, email }: Props) {
 
     const review = Array.isArray(currentCard.review) ? currentCard.review[0] : currentCard.review;
     const currentData = review
-      ? { easeFactor: review.ease_factor, interval: review.interval, repetitions: review.repetitions, dueDate: review.due_date }
+      ? { easeFactor: review.ease_factor, interval: review.interval, repetitions: review.repetitions, lapses: review.lapses ?? 0, dueDate: review.due_date }
       : getInitialReviewData();
 
     const next = calculateNextReview(currentData, quality);
@@ -52,6 +52,7 @@ export default function StudyClient({ deck, dueCards, email }: Props) {
         ease_factor: next.easeFactor,
         interval: next.interval,
         repetitions: next.repetitions,
+        lapses: next.lapses,
         due_date: next.dueDate,
         last_reviewed: new Date().toISOString(),
       }).eq('id', review.id);
@@ -63,10 +64,23 @@ export default function StudyClient({ deck, dueCards, email }: Props) {
         ease_factor: next.easeFactor,
         interval: next.interval,
         repetitions: next.repetitions,
+        lapses: next.lapses,
         due_date: next.dueDate,
         last_reviewed: new Date().toISOString(),
       });
     }
+
+    // Log the review for statistics
+    const { data: { user: logUser } } = await supabase.auth.getUser();
+    await supabase.from('review_logs').insert({
+      card_id: currentCard.id,
+      user_id: logUser?.id,
+      rating: quality,
+      ease_before: currentData.easeFactor,
+      ease_after: next.easeFactor,
+      interval_before: currentData.interval,
+      interval_after: next.interval,
+    });
 
     // Update stats
     setStats((prev) => ({
@@ -191,8 +205,10 @@ export default function StudyClient({ deck, dueCards, email }: Props) {
         {/* Flash card */}
         <div style={{ perspective: '1200px', minHeight: '280px' }} className="mb-8">
           <FlashCard
+            type={currentCard.type || 'basic'}
             front={currentCard.front}
             back={currentCard.back}
+            clozeText={currentCard.cloze_text}
             revealed={revealed}
             onReveal={() => setRevealed(true)}
           />

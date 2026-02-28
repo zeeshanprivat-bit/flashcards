@@ -14,8 +14,12 @@ import { createClient } from '@/lib/supabase/client';
 import { getInitialReviewData } from '@/lib/sm2';
 
 interface CardDraft {
+  type: 'basic' | 'cloze';
   front: string;
   back: string;
+  cloze_text?: string;
+  tags: string[];
+  tagInput?: string;
 }
 
 export default function NewDeckPage() {
@@ -23,19 +27,33 @@ export default function NewDeckPage() {
   const supabase = createClient();
 
   const [title, setTitle] = useState('');
-  const [cards, setCards] = useState<CardDraft[]>([{ front: '', back: '' }]);
+  const [cards, setCards] = useState<CardDraft[]>([{ type: 'basic', front: '', back: '', tags: [], tagInput: '' }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const [aiOpen, setAiOpen] = useState(false);
   const [aiText, setAiText] = useState('');
+  const [aiStyle, setAiStyle] = useState('balanced');
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiError, setAiError] = useState('');
 
-  const validCards = cards.filter((c) => c.front.trim() && c.back.trim());
+  const validCards = cards.filter((c) => {
+    if (c.type === 'cloze') return (c.cloze_text ?? '').trim().length > 0;
+    return c.front.trim() && c.back.trim();
+  });
 
-  function updateCard(index: number, field: 'front' | 'back', value: string) {
+  function updateCard(index: number, field: string, value: any) {
     setCards((prev) => prev.map((c, i) => i === index ? { ...c, [field]: value } : c));
+  }
+
+  function addTag(index: number, tag: string) {
+    const t = tag.trim().toLowerCase();
+    if (!t) return;
+    setCards((prev) => prev.map((c, i) => i === index ? { ...c, tags: [...new Set([...c.tags, t])], tagInput: '' } : c));
+  }
+
+  function removeTag(index: number, tag: string) {
+    setCards((prev) => prev.map((c, i) => i === index ? { ...c, tags: c.tags.filter((tt) => tt !== tag) } : c));
   }
 
   function removeCard(index: number) {
@@ -43,7 +61,7 @@ export default function NewDeckPage() {
   }
 
   function addCard() {
-    setCards((prev) => [...prev, { front: '', back: '' }]);
+    setCards((prev) => [...prev, { type: 'basic', front: '', back: '', tags: [], tagInput: '' }]);
   }
 
   async function handleAiGenerate() {
@@ -54,13 +72,21 @@ export default function NewDeckPage() {
       const res = await fetch('/api/generate-cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: aiText, deckTitle: title }),
+        body: JSON.stringify({ text: aiText, deckTitle: title, style: aiStyle }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Generation failed');
       setCards((prev) => {
-        const nonEmpty = prev.filter((c) => c.front.trim() || c.back.trim());
-        return [...nonEmpty, ...data.cards];
+        const nonEmpty = prev.filter((c) => c.front.trim() || c.back.trim() || (c.cloze_text ?? '').trim());
+        const newCards = data.cards.map((c: any) => ({
+          type: c.type || 'basic',
+          front: c.front || '',
+          back: c.back || '',
+          cloze_text: c.cloze_text || '',
+          tags: c.tags || [],
+          tagInput: '',
+        }));
+        return [...nonEmpty, ...newCards];
       });
       setAiText('');
       setAiOpen(false);
@@ -88,7 +114,15 @@ export default function NewDeckPage() {
 
       const { data: insertedCards, error: cardsErr } = await supabase
         .from('cards')
-        .insert(validCards.map((c) => ({ deck_id: deck.id, user_id: user.id, front: c.front.trim(), back: c.back.trim() })))
+        .insert(validCards.map((c) => ({
+          deck_id: deck.id,
+          user_id: user.id,
+          type: c.type,
+          front: c.type === 'cloze' ? (c.cloze_text ?? '').replace(/\{\{c\d+::(.*?)\}\}/g, '$1') : c.front.trim(),
+          back: c.back.trim(),
+          cloze_text: c.type === 'cloze' ? c.cloze_text?.trim() : null,
+          tags: c.tags,
+        })))
         .select();
       if (cardsErr) throw cardsErr;
 
@@ -145,7 +179,21 @@ export default function NewDeckPage() {
           {cards.map((card, i) => (
             <div key={i} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 group">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Card {i + 1}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Card {i + 1}</span>
+                  <div className="flex rounded-lg border border-slate-200 p-0.5 gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => updateCard(i, 'type', 'basic')}
+                      className={`px-2.5 py-0.5 text-xs font-medium rounded-md transition-all ${card.type === 'basic' ? 'bg-violet-600 text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                    >Basic</button>
+                    <button
+                      type="button"
+                      onClick={() => updateCard(i, 'type', 'cloze')}
+                      className={`px-2.5 py-0.5 text-xs font-medium rounded-md transition-all ${card.type === 'cloze' ? 'bg-violet-600 text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                    >Cloze</button>
+                  </div>
+                </div>
                 <button
                   onClick={() => removeCard(i)}
                   disabled={cards.length === 1}
@@ -154,23 +202,72 @@ export default function NewDeckPage() {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-violet-600 mb-1">Question</label>
-                  <Textarea
-                    placeholder="e.g. What is the mitochondria?"
-                    value={card.front}
-                    onChange={(e) => updateCard(i, 'front', e.target.value)}
-                    className="min-h-[80px] text-sm"
-                  />
+
+              {card.type === 'cloze' ? (
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-xs font-medium text-violet-600 mb-1">
+                      Cloze text <span className="font-normal text-slate-400">— wrap blanks in {'{{c1::answer}}'}</span>
+                    </label>
+                    <Textarea
+                      placeholder="e.g. Ved hjertesvikt er {{c1::BNP}} ofte forhøyet."
+                      value={card.cloze_text ?? ''}
+                      onChange={(e) => updateCard(i, 'cloze_text', e.target.value)}
+                      className="min-h-[80px] text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-emerald-600 mb-1">Extra info (optional)</label>
+                    <Textarea
+                      placeholder="Additional explanation shown after reveal"
+                      value={card.back}
+                      onChange={(e) => updateCard(i, 'back', e.target.value)}
+                      className="min-h-[50px] text-sm"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-emerald-600 mb-1">Answer</label>
-                  <Textarea
-                    placeholder="e.g. The powerhouse of the cell"
-                    value={card.back}
-                    onChange={(e) => updateCard(i, 'back', e.target.value)}
-                    className="min-h-[80px] text-sm"
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-violet-600 mb-1">Question</label>
+                    <Textarea
+                      placeholder="e.g. What is the mitochondria?"
+                      value={card.front}
+                      onChange={(e) => updateCard(i, 'front', e.target.value)}
+                      className="min-h-[80px] text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-emerald-600 mb-1">Answer</label>
+                    <Textarea
+                      placeholder="e.g. The powerhouse of the cell"
+                      value={card.back}
+                      onChange={(e) => updateCard(i, 'back', e.target.value)}
+                      className="min-h-[80px] text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Tags */}
+              <div className="mt-3">
+                <div className="flex items-center flex-wrap gap-1.5">
+                  {card.tags.map((tag) => (
+                    <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-xs text-slate-600">
+                      {tag}
+                      <button onClick={() => removeTag(i, tag)} className="text-slate-400 hover:text-red-500">&times;</button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    placeholder="Add tag..."
+                    value={card.tagInput ?? ''}
+                    onChange={(e) => updateCard(i, 'tagInput', e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(i, card.tagInput ?? ''); }
+                    }}
+                    onBlur={() => addTag(i, card.tagInput ?? '')}
+                    className="text-xs border-none outline-none bg-transparent w-24 py-0.5 text-slate-500 placeholder:text-slate-300"
                   />
                 </div>
               </div>
@@ -210,6 +307,24 @@ export default function NewDeckPage() {
                 className="min-h-[160px] leading-relaxed"
                 maxLength={8000}
               />
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5">Style</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {([
+                    { value: 'balanced', label: 'Balanced' },
+                    { value: 'high-yield', label: 'High-yield' },
+                    { value: 'exam-focus', label: 'Exam focus' },
+                    { value: 'clinical-case', label: 'Clinical case' },
+                  ] as const).map((s) => (
+                    <button
+                      key={s.value}
+                      type="button"
+                      onClick={() => setAiStyle(s.value)}
+                      className={`px-3 py-1 text-xs font-medium rounded-full border transition-all ${aiStyle === s.value ? 'bg-violet-600 text-white border-violet-600' : 'border-slate-200 text-slate-500 hover:border-violet-300'}`}
+                    >{s.label}</button>
+                  ))}
+                </div>
+              </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400">{aiText.length}/8000</span>
                 <Button

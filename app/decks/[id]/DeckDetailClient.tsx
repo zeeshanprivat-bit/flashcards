@@ -34,10 +34,15 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
   const [aiText, setAiText] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiError, setAiError] = useState('');
-  const [aiPreview, setAiPreview] = useState<{ front: string; back: string }[]>([]);
+  const [aiPreview, setAiPreview] = useState<{ type?: string; front: string; back: string; cloze_text?: string; tags?: string[] }[]>([]);
   const [aiSaving, setAiSaving] = useState(false);
+  const [filterTag, setFilterTag] = useState<string | null>(null);
   const supabase = createClient();
   const router = useRouter();
+
+  // Collect all unique tags
+  const allTags = [...new Set(cards.flatMap((c) => c.tags ?? []))];
+  const filteredCards = filterTag ? cards.filter((c) => (c.tags ?? []).includes(filterTag)) : cards;
 
   const dueCount = cards.filter((c) => {
     const r = Array.isArray(c.review) ? c.review[0] : c.review;
@@ -101,10 +106,18 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
     setAiSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setAiSaving(false); return; }
-    const valid = aiPreview.filter((c) => c.front.trim() && c.back.trim());
+    const valid = aiPreview.filter((c) => c.front.trim() || (c.cloze_text ?? '').trim());
     const { data: inserted } = await supabase
       .from('cards')
-      .insert(valid.map((c) => ({ deck_id: deck.id, user_id: user.id, front: c.front.trim(), back: c.back.trim() })))
+      .insert(valid.map((c) => ({
+        deck_id: deck.id,
+        user_id: user.id,
+        type: c.type || 'basic',
+        front: c.type === 'cloze' ? (c.cloze_text ?? '').replace(/\{\{c\d+::(.*?)\}\}/g, '$1') : c.front.trim(),
+        back: c.back.trim(),
+        cloze_text: c.type === 'cloze' ? c.cloze_text : null,
+        tags: c.tags ?? [],
+      })))
       .select();
     if (inserted) {
       const rv = getInitialReviewData();
@@ -130,7 +143,7 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
 
     const { data: card } = await supabase
       .from('cards')
-      .insert({ deck_id: deck.id, user_id: user.id, front: newFront.trim(), back: newBack.trim() })
+      .insert({ deck_id: deck.id, user_id: user.id, type: 'basic', front: newFront.trim(), back: newBack.trim(), tags: [] })
       .select()
       .single();
 
@@ -267,9 +280,27 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
           )}
         </div>
 
+        {/* Tag filter */}
+        {allTags.length > 0 && (
+          <div className="flex items-center flex-wrap gap-1.5 mb-4">
+            <span className="text-xs text-slate-400 mr-1">Filter:</span>
+            <button
+              onClick={() => setFilterTag(null)}
+              className={`px-2.5 py-0.5 text-xs font-medium rounded-full border transition-all ${!filterTag ? 'bg-violet-600 text-white border-violet-600' : 'border-slate-200 text-slate-500 hover:border-violet-300'}`}
+            >All</button>
+            {allTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setFilterTag(filterTag === tag ? null : tag)}
+                className={`px-2.5 py-0.5 text-xs font-medium rounded-full border transition-all ${filterTag === tag ? 'bg-violet-600 text-white border-violet-600' : 'border-slate-200 text-slate-500 hover:border-violet-300'}`}
+              >{tag}</button>
+            ))}
+          </div>
+        )}
+
         {/* Cards list */}
         <div className="space-y-3">
-          {cards.map((card) => {
+          {filteredCards.map((card) => {
             const review = Array.isArray(card.review) ? card.review[0] : card.review;
             const due = review ? formatDueDate(review.due_date) : 'Due now';
             const isEditing = editingId === card.id;
@@ -319,13 +350,19 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
                         </Button>
                       </div>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-slate-100">
+                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center flex-wrap gap-1.5">
                       <Badge variant={due === 'Due now' ? 'warning' : 'secondary'} className="text-xs">
                         {due}
                       </Badge>
+                      {card.type === 'cloze' && (
+                        <Badge variant="secondary" className="text-xs">Cloze</Badge>
+                      )}
+                      {(card.tags ?? []).map((tag) => (
+                        <span key={tag} className="px-2 py-0.5 rounded-full bg-slate-100 text-xs text-slate-500">{tag}</span>
+                      ))}
                       {review && (
-                        <span className="ml-2 text-xs text-slate-400">
-                          Interval: {review.interval}d · EF: {review.ease_factor?.toFixed(1)}
+                        <span className="ml-auto text-xs text-slate-400">
+                          {review.interval}d · EF {review.ease_factor?.toFixed(1)}
                         </span>
                       )}
                     </div>
