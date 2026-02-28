@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { text, deckTitle, style = 'balanced' } = await request.json();
-  if (!text || text.trim().length < 20) {
+  if (!text || text.trim().length < 10) {
     return NextResponse.json({ error: 'Text too short' }, { status: 400 });
   }
   if (text.length > 8000) {
@@ -60,37 +60,32 @@ export async function POST(request: NextRequest) {
 
     const { text: aiResponse } = await generateText({
       model: gateway('openai/gpt-4o-mini'),
-      system: `You are a flashcard generator for medical students (and general learners). Extract key concepts from the given text and create flashcards.
+      system: `You are a flashcard generator for medical students. The user pastes a single concept — often already structured as a question and answer. Your job is to create EXACTLY ONE flashcard from it.
 You MUST respond with ONLY valid JSON, no markdown, no code fences, no extra text.
-
-Style: ${styleGuide}
 
 Response format (strict JSON):
 {
   "cards": [
     {
-      "type": "basic" or "cloze",
-      "front": "question text",
-      "back": "answer text",
-      "cloze_text": "sentence with {{c1::blank}} format" or null,
+      "type": "basic",
+      "front": "the question (use the question from the text if present, otherwise create one)",
+      "back": "the answer (clean, concise, use bullet points with \\n if the answer has multiple items)",
+      "cloze_text": null,
       "tags": ["tag1", "tag2"],
-      "source_snippet": "relevant text from input" or null
+      "source_snippet": null
     }
   ]
 }
 
 Rules:
-- Create 5-20 cards depending on text length
-- Max 1 fact per card (atomic cards)
-- For basic cards: questions should be specific and concrete, answers concise (1-3 sentences)
-- For cloze cards: use {{c1::answer}} format for blanks in the cloze_text field
-- Avoid vague questions like "Explain..." — use concrete triggers
-- Include 1-3 lowercase topic tags per card
-- Include source_snippet showing which part of the input text the card comes from
-- No hallucinations: only create cards from the provided text
-- Prioritize high-yield content: definitions, mechanisms, differentials, side effects, key numbers
-- Merge duplicates, skip trivial facts`,
-      prompt: `Create flashcards from this text:\n\n${text}`,
+- Always return EXACTLY 1 card — never more
+- If the text already contains a clear question + answer, extract them directly
+- Keep the front as the exact question if one is present
+- Keep the back faithful to the answer in the text, preserving key details and bullet points
+- Use \\n to separate bullet points in the back field
+- Include 1-3 lowercase topic tags
+- Do not add information not present in the text`,
+      prompt: `Create one flashcard from this text:\n\n${text}`,
       temperature: 0.3,
     });
 
