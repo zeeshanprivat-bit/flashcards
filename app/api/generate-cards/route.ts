@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { generateObject } from 'ai';
+import { generateText } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 
-const flashcardsSchema = z.object({
-  cards: z.array(
-    z.object({
-      type: z.enum(['basic', 'cloze']).describe('Card type: basic (Q→A) or cloze (fill-in-the-blank)'),
-      front: z.string().describe('The question (for basic) or a summary prompt (for cloze)'),
-      back: z.string().describe('The answer or explanation (1-3 sentences)'),
-      cloze_text: z.string().nullable().describe('For cloze cards: full sentence with blanks in {{c1::answer}} format. null for basic cards.'),
-      tags: z.array(z.string()).describe('1-3 relevant topic tags, lowercase'),
-      source_snippet: z.string().nullable().describe('The part of the input text this card was derived from'),
-    })
-  ).min(1).max(20),
+const cardSchema = z.object({
+  type: z.enum(['basic', 'cloze']),
+  front: z.string(),
+  back: z.string(),
+  cloze_text: z.string().nullable().optional(),
+  tags: z.array(z.string()).default([]),
+  source_snippet: z.string().nullable().optional(),
 });
+
+const flashcardsSchema = z.object({ cards: z.array(cardSchema).min(1).max(20) });
 
 type Style = 'balanced' | 'high-yield' | 'exam-focus' | 'clinical-case';
 
@@ -60,12 +58,26 @@ export async function POST(request: NextRequest) {
       baseURL: 'https://ai-gateway.vercel.sh/v1',
     });
 
-    const { object } = await generateObject({
+    const { text: aiResponse } = await generateText({
       model: gateway('openai/gpt-4o-mini'),
-      schema: flashcardsSchema,
       system: `You are a flashcard generator for medical students (and general learners). Extract key concepts from the given text and create flashcards.
+You MUST respond with ONLY valid JSON, no markdown, no code fences, no extra text.
 
 Style: ${styleGuide}
+
+Response format (strict JSON):
+{
+  "cards": [
+    {
+      "type": "basic" or "cloze",
+      "front": "question text",
+      "back": "answer text",
+      "cloze_text": "sentence with {{c1::blank}} format" or null,
+      "tags": ["tag1", "tag2"],
+      "source_snippet": "relevant text from input" or null
+    }
+  ]
+}
 
 Rules:
 - Create 5-20 cards depending on text length
@@ -82,6 +94,10 @@ Rules:
       temperature: 0.3,
     });
 
+    // Parse and validate JSON response
+    const cleaned = aiResponse.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '').trim();
+    const parsed = flashcardsSchema.parse(JSON.parse(cleaned));
+
     // Log usage
     await supabase.from('ai_usage').insert({ user_id: user.id });
 
@@ -89,12 +105,12 @@ Rules:
     await supabase.from('ai_generation_jobs').insert({
       user_id: user.id,
       input_text: text.substring(0, 2000),
-      output_cards: object.cards,
+      output_cards: parsed.cards,
       style: style,
       status: 'completed',
     });
 
-    return NextResponse.json({ cards: object.cards });
+    return NextResponse.json({ cards: parsed.cards });
   } catch (error: any) {
     console.error('AI generation error:', error);
     return NextResponse.json({ error: error.message || 'AI generation failed' }, { status: 500 });
