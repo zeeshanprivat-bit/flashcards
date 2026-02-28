@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
@@ -54,13 +54,14 @@ export async function POST(request: NextRequest) {
   const styleGuide = STYLE_INSTRUCTIONS[style as Style] ?? STYLE_INSTRUCTIONS.balanced;
 
   try {
-    const openai = createOpenAI({
+    const gateway = createOpenAICompatible({
+      name: 'openai',
       apiKey: process.env.VERCEL_API_KEY,
-      baseURL: 'https://api.vercel.ai/v1',
+      baseURL: 'https://ai-gateway.vercel.sh/v1',
     });
 
     const { object } = await generateObject({
-      model: openai('openai/gpt-4o-mini'),
+      model: gateway('openai/gpt-4o-mini'),
       schema: flashcardsSchema,
       system: `You are a flashcard generator for medical students (and general learners). Extract key concepts from the given text and create flashcards.
 
