@@ -43,7 +43,7 @@ export default function FlashCard({ type = 'basic', front, back, clozeText, reve
       {isCloze ? (
         <div className="flex flex-col items-center justify-center rounded-2xl bg-white border border-slate-200 shadow-md p-8 text-center" style={{ minHeight: '280px' }}>
           <div className="text-xs font-semibold uppercase tracking-widest text-violet-400 mb-4">
-            {revealed ? 'Fill in the blank' : 'Cloze'}
+            {revealed ? 'Fyll inn blanken' : 'Cloze'}
           </div>
           <p className="text-xl font-medium text-slate-800 leading-relaxed">
             {renderCloze(clozeText!, revealed)}
@@ -52,7 +52,7 @@ export default function FlashCard({ type = 'basic', front, back, clozeText, reve
             <p className="mt-4 text-sm text-slate-500 leading-relaxed">{back}</p>
           )}
           {!revealed && (
-            <div className="mt-6 text-sm text-slate-400">Tap to reveal</div>
+            <div className="mt-6 text-sm text-slate-400">Trykk for å avsløre</div>
           )}
         </div>
       ) : (
@@ -69,9 +69,9 @@ export default function FlashCard({ type = 'basic', front, back, clozeText, reve
             className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-white border border-slate-200 shadow-md p-8 text-center"
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <div className="text-xs font-semibold uppercase tracking-widest text-violet-400 mb-4">Question</div>
+            <div className="text-xs font-semibold uppercase tracking-widest text-violet-400 mb-4">Spørsmål</div>
             <p className="text-xl font-medium text-slate-800 leading-relaxed">{front}</p>
-            <div className="mt-6 text-sm text-slate-400">Tap to reveal answer</div>
+            <div className="mt-6 text-sm text-slate-400">Trykk for å se svar</div>
           </div>
 
           {/* Back */}
@@ -79,7 +79,7 @@ export default function FlashCard({ type = 'basic', front, back, clozeText, reve
             className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-violet-600 border border-violet-700 shadow-md p-8 text-center"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
-            <div className="text-xs font-semibold uppercase tracking-widest text-violet-200 mb-4">Answer</div>
+            <div className="text-xs font-semibold uppercase tracking-widest text-violet-200 mb-4">Svar</div>
             <p className="text-xl font-medium text-white leading-relaxed">{back}</p>
           </div>
         </div>

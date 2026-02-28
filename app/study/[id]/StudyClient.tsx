@@ -17,10 +17,10 @@ interface Props {
 }
 
 const RATINGS: { label: string; variant: 'again' | 'hard' | 'good' | 'easy'; value: 1 | 2 | 3 | 4; hint: string }[] = [
-  { label: 'Again', variant: 'again', value: 1, hint: 'Completely forgot' },
-  { label: 'Hard', variant: 'hard', value: 2, hint: 'Remembered with difficulty' },
-  { label: 'Good', variant: 'good', value: 3, hint: 'Remembered correctly' },
-  { label: 'Easy', variant: 'easy', value: 4, hint: 'Perfect recall' },
+  { label: 'Igjen', variant: 'again', value: 1, hint: 'Husket ikke' },
+  { label: 'Vanskelig', variant: 'hard', value: 2, hint: 'Husket med vanskeligheter' },
+  { label: 'Bra', variant: 'good', value: 3, hint: 'Husket riktig' },
+  { label: 'Lett', variant: 'easy', value: 4, hint: 'Perfekt' },
 ];
 
 export default function StudyClient({ deck, dueCards, email }: Props) {
@@ -126,10 +126,10 @@ export default function StudyClient({ deck, dueCards, email }: Props) {
           <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8 text-emerald-500" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Nothing due!</h2>
-          <p className="text-slate-500 mb-6">All cards in this deck are up to date. Come back later.</p>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Ingenting forfaller!</h2>
+          <p className="text-slate-500 mb-6">Alle kort i denne kortstokken er oppdatert. Kom tilbake senere.</p>
           <Link href="/dashboard">
-            <Button variant="outline"><ArrowLeft className="w-4 h-4" /> Back to decks</Button>
+            <Button variant="outline"><ArrowLeft className="w-4 h-4" /> Tilbake til kortstokker</Button>
           </Link>
         </main>
       </div>
@@ -148,15 +148,15 @@ export default function StudyClient({ deck, dueCards, email }: Props) {
           <div className="w-20 h-20 rounded-2xl bg-violet-100 flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10 text-violet-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-1">Session complete!</h2>
-          <p className="text-slate-500 mb-8">{total} cards reviewed · {pct}% good or easy</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-1">Økten er ferdig!</h2>
+          <p className="text-slate-500 mb-8">{total} kort repetert · {pct}% bra eller lett</p>
 
           <div className="grid grid-cols-4 gap-3 mb-8">
             {[
-              { label: 'Again', count: stats.again, color: 'bg-red-100 text-red-700' },
-              { label: 'Hard', count: stats.hard, color: 'bg-orange-100 text-orange-700' },
-              { label: 'Good', count: stats.good, color: 'bg-emerald-100 text-emerald-700' },
-              { label: 'Easy', count: stats.easy, color: 'bg-blue-100 text-blue-700' },
+              { label: 'Igjen', count: stats.again, color: 'bg-red-100 text-red-700' },
+              { label: 'Vanskelig', count: stats.hard, color: 'bg-orange-100 text-orange-700' },
+              { label: 'Bra', count: stats.good, color: 'bg-emerald-100 text-emerald-700' },
+              { label: 'Lett', count: stats.easy, color: 'bg-blue-100 text-blue-700' },
             ].map(({ label, count, color }) => (
               <div key={label} className={`rounded-2xl p-4 ${color}`}>
                 <div className="text-2xl font-bold">{count}</div>
@@ -167,10 +167,10 @@ export default function StudyClient({ deck, dueCards, email }: Props) {
 
           <div className="flex justify-center gap-3">
             <Link href="/dashboard">
-              <Button variant="outline"><ArrowLeft className="w-4 h-4" /> All decks</Button>
+              <Button variant="outline"><ArrowLeft className="w-4 h-4" /> Alle kortstokker</Button>
             </Link>
             <Link href={`/decks/${deck.id}`}>
-              <Button variant="secondary">View deck</Button>
+              <Button variant="secondary">Se kortstokk</Button>
             </Link>
           </div>
         </main>
@@ -217,7 +217,7 @@ export default function StudyClient({ deck, dueCards, email }: Props) {
         {/* Rating buttons — only show after reveal */}
         {revealed ? (
           <div>
-            <p className="text-xs text-center text-slate-400 font-medium uppercase tracking-wider mb-3">How well did you know this? <span className="normal-case font-normal">(press 1–4)</span></p>
+            <p className="text-xs text-center text-slate-400 font-medium uppercase tracking-wider mb-3">Hvor godt husket du dette? <span className="normal-case font-normal">(trykk 1–4)</span></p>
             <div className="grid grid-cols-4 gap-3">
               {RATINGS.map(({ label, variant, value, hint }) => (
                 <button
@@ -239,8 +239,8 @@ export default function StudyClient({ deck, dueCards, email }: Props) {
         ) : (
           <div className="text-center">
             <Button size="lg" onClick={() => setRevealed(true)} className="px-12">
-              Reveal answer
-              <span className="ml-2 text-xs opacity-60 font-normal">Space</span>
+              Vis svar
+              <span className="ml-2 text-xs opacity-60 font-normal">Mellomrom</span>
             </Button>
           </div>
         )}

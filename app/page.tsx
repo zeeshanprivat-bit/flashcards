@@ -16,19 +16,19 @@ export default function Home() {
         {/* Hero */}
         <div className="text-center mb-10 max-w-md">
           <h1 className="text-4xl font-bold text-slate-900 mb-3 tracking-tight">
-            Study smarter with AI
+            Studer smartere med AI
           </h1>
           <p className="text-slate-500 text-lg leading-relaxed">
-            Paste any text and AI generates flashcards instantly. Spaced repetition keeps you reviewing at the perfect time.
+            Lim inn tekst og AI lager flashcards automatisk. Repetisjon med mellomrom sørger for at du repeterer til rett tid.
           </p>
         </div>
 
         {/* Features */}
         <div className="flex flex-wrap justify-center gap-4 mb-10">
           {[
-            { icon: Zap, label: 'AI card generation' },
-            { icon: RefreshCw, label: 'Spaced repetition' },
-            { icon: Brain, label: 'Synced to cloud' },
+            { icon: Zap, label: 'AI-genererte kort' },
+            { icon: RefreshCw, label: 'Repetisjon med mellomrom' },
+            { icon: Brain, label: 'Synkronisert i skyen' },
           ].map(({ icon: Icon, label }) => (
             <div key={label} className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-slate-200 shadow-sm text-sm font-medium text-slate-700">
               <Icon className="w-4 h-4 text-violet-500" />
@@ -40,8 +40,8 @@ export default function Home() {
         {/* Auth card */}
         <div className="w-full max-w-sm">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xl shadow-slate-100 p-8">
-            <h2 className="text-lg font-semibold text-slate-900 mb-1">Get started</h2>
-            <p className="text-sm text-slate-500 mb-6">Sign in or create a free account</p>
+            <h2 className="text-lg font-semibold text-slate-900 mb-1">Kom i gang</h2>
+            <p className="text-sm text-slate-500 mb-6">Logg inn eller opprett en gratis konto</p>
             <LoginForm />
           </div>
         </div>

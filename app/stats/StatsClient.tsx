@@ -104,18 +104,18 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, email }: 
             <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Statistics</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Your study performance over the last 30 days</p>
+            <h1 className="text-2xl font-bold text-slate-900">Statistikk</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Din studieprestasjon de siste 30 dagene</p>
           </div>
         </div>
 
         {/* Top stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
-            { icon: Flame, label: 'Streak', value: `${streak} day${streak !== 1 ? 's' : ''}`, color: 'bg-orange-100 text-orange-600' },
-            { icon: Target, label: 'Retention', value: `${retention}%`, color: 'bg-emerald-100 text-emerald-600' },
-            { icon: TrendingUp, label: 'Reviews (30d)', value: totalReviews.toString(), color: 'bg-violet-100 text-violet-600' },
-            { icon: BarChart3, label: 'Avg interval', value: `${avgInterval}d`, color: 'bg-blue-100 text-blue-600' },
+            { icon: Flame, label: 'Streak', value: `${streak} dag${streak !== 1 ? 'er' : ''}`, color: 'bg-orange-100 text-orange-600' },
+            { icon: Target, label: 'Retensjon', value: `${retention}%`, color: 'bg-emerald-100 text-emerald-600' },
+            { icon: TrendingUp, label: 'Repetisjoner (30d)', value: totalReviews.toString(), color: 'bg-violet-100 text-violet-600' },
+            { icon: BarChart3, label: 'Snitt intervall', value: `${avgInterval}d`, color: 'bg-blue-100 text-blue-600' },
           ].map(({ icon: Icon, label, value, color }) => (
             <div key={label} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
               <div className={`w-9 h-9 rounded-xl ${color} flex items-center justify-center mb-3`}>
@@ -129,7 +129,7 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, email }: 
 
         {/* Reviews per day chart */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Reviews per day (last 14 days)</h2>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4">Repetisjoner per dag (siste 14 dager)</h2>
           <div className="flex items-end gap-1.5" style={{ height: '120px' }}>
             {last14.map((day) => (
               <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
@@ -149,13 +149,13 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, email }: 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
           {/* Rating distribution */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-slate-700 mb-4">Rating distribution</h2>
+            <h2 className="text-sm font-semibold text-slate-700 mb-4">Vurderingsfordeling</h2>
             <div className="space-y-2.5">
               {[
-                { label: 'Again', count: ratingCounts[1], color: 'bg-red-500' },
-                { label: 'Hard', count: ratingCounts[2], color: 'bg-orange-500' },
-                { label: 'Good', count: ratingCounts[3], color: 'bg-emerald-500' },
-                { label: 'Easy', count: ratingCounts[4], color: 'bg-blue-500' },
+                { label: 'Igjen', count: ratingCounts[1], color: 'bg-red-500' },
+                { label: 'Vanskelig', count: ratingCounts[2], color: 'bg-orange-500' },
+                { label: 'Bra', count: ratingCounts[3], color: 'bg-emerald-500' },
+                { label: 'Lett', count: ratingCounts[4], color: 'bg-blue-500' },
               ].map(({ label, count, color }) => {
                 const pct = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
                 return (
@@ -173,7 +173,7 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, email }: 
 
           {/* Ease distribution */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-slate-700 mb-4">Ease factor distribution</h2>
+            <h2 className="text-sm font-semibold text-slate-700 mb-4">Ease-faktor fordeling</h2>
             <div className="flex items-end gap-2" style={{ height: '100px' }}>
               {[
                 { label: '<1.5', count: easeBuckets[0] },
@@ -200,7 +200,7 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, email }: 
         {/* Summary */}
         <div className="bg-slate-100 rounded-2xl p-4 text-center">
           <p className="text-sm text-slate-600">
-            <strong>{totalCards}</strong> total cards · <strong>{reviews.length}</strong> with review data · <strong>{reviews.filter(r => r.lapses > 0).length}</strong> lapsed
+            <strong>{totalCards}</strong> totalt kort · <strong>{reviews.length}</strong> med repetisjonsdata · <strong>{reviews.filter(r => r.lapses > 0).length}</strong> glemt
           </p>
         </div>
       </main>

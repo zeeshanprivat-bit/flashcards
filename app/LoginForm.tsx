@@ -28,7 +28,7 @@ export default function LoginForm() {
       if (error) {
         setError(error.message);
       } else {
-        setSuccess('Account created! Check your email to confirm, then sign in.');
+        setSuccess('Konto opprettet! Sjekk e-posten din for bekreftelse, og logg inn.');
         setMode('login');
       }
     } else {
@@ -51,14 +51,14 @@ export default function LoginForm() {
           onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
           className={`flex-1 py-1.5 text-sm font-medium rounded-lg transition-all ${mode === 'login' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
         >
-          Sign in
+          Logg inn
         </button>
         <button
           type="button"
           onClick={() => { setMode('signup'); setError(''); setSuccess(''); }}
           className={`flex-1 py-1.5 text-sm font-medium rounded-lg transition-all ${mode === 'signup' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
         >
-          Sign up
+          Registrer
         </button>
       </div>
 
@@ -73,7 +73,7 @@ export default function LoginForm() {
         />
         <Input
           type="password"
-          placeholder="Password"
+          placeholder="Passord"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -81,7 +81,7 @@ export default function LoginForm() {
           minLength={6}
         />
         <Button type="submit" className="w-full h-11" disabled={loading || !email || !password}>
-          {loading ? (mode === 'signup' ? 'Creating account...' : 'Signing in...') : (mode === 'signup' ? 'Create account' : 'Sign in')}
+          {loading ? (mode === 'signup' ? 'Oppretter konto...' : 'Logger inn...') : (mode === 'signup' ? 'Opprett konto' : 'Logg inn')}
         </Button>
       </form>
 

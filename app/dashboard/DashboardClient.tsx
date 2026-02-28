@@ -21,7 +21,7 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
   const supabase = createClient();
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this deck and all its cards? This cannot be undone.')) return;
+    if (!confirm('Slette denne kortstokken og alle kort? Dette kan ikke angres.')) return;
     await supabase.from('decks').delete().eq('id', id);
     setDecks((prev) => prev.filter((d) => d.id !== id));
   }
@@ -39,11 +39,11 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">Your decks</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Dine kortstokker</h1>
           <Link href="/decks/new">
             <Button>
               <Plus className="w-4 h-4" />
-              New deck
+              Ny kortstokk
             </Button>
           </Link>
         </div>
@@ -55,8 +55,8 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
               <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-4">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
                 <div>
-                  <p className="font-semibold text-emerald-800 text-sm">All caught up!</p>
-                  <p className="text-xs text-emerald-600 mt-0.5">No cards due right now. Come back later or add new cards.</p>
+                  <p className="font-semibold text-emerald-800 text-sm">Alt oppdatert!</p>
+                  <p className="text-xs text-emerald-600 mt-0.5">Ingen kort forfaller nå. Kom tilbake senere eller legg til nye kort.</p>
                 </div>
               </div>
             ) : totalDue > 0 ? (
@@ -69,7 +69,7 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
                       </div>
                       <div>
                         <p className="text-xl font-bold text-slate-900 leading-none">{totalDue}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">cards due</p>
+                        <p className="text-xs text-slate-500 mt-0.5">kort forfaller</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5">
@@ -78,7 +78,7 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
                       </div>
                       <div>
                         <p className="text-xl font-bold text-slate-900 leading-none">{decksWithDue.length}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">deck{decksWithDue.length !== 1 ? 's' : ''} to review</p>
+                        <p className="text-xs text-slate-500 mt-0.5">kortstokk{decksWithDue.length !== 1 ? 'er' : ''} å repetere</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5">
@@ -87,7 +87,7 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
                       </div>
                       <div>
                         <p className="text-xl font-bold text-slate-900 leading-none">{totalCards}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">total cards</p>
+                        <p className="text-xs text-slate-500 mt-0.5">totalt kort</p>
                       </div>
                     </div>
                   </div>
@@ -95,7 +95,7 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
                     <Link href={`/study/${topDueDeck.id}`}>
                       <Button size="sm">
                         <Clock className="w-4 h-4" />
-                        Start reviewing · {topDueDeck.title}
+                        Start repetisjon · {topDueDeck.title}
                       </Button>
                     </Link>
                   )}
@@ -110,14 +110,14 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
             <div className="w-16 h-16 rounded-2xl bg-violet-100 flex items-center justify-center mb-4">
               <Brain className="w-8 h-8 text-violet-500" />
             </div>
-            <h2 className="text-xl font-semibold text-slate-900 mb-2">No decks yet</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">Ingen kortstokker ennå</h2>
             <p className="text-slate-500 mb-6 max-w-sm">
-              Create your first deck by pasting text and letting AI generate flashcards for you.
+              Lag din første kortstokk ved å lime inn tekst og la AI generere flashcards for deg.
             </p>
             <Link href="/decks/new">
               <Button size="lg">
                 <Plus className="w-5 h-5" />
-                Create first deck
+                Lag første kortstokk
               </Button>
             </Link>
           </div>

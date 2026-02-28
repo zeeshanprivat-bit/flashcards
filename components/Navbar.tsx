@@ -34,24 +34,24 @@ export default function Navbar({ email }: NavbarProps) {
           <Link href="/stats">
             <Button size="sm" variant="ghost">
               <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">Stats</span>
+              <span className="hidden sm:inline">Statistikk</span>
             </Button>
           </Link>
           <Link href="/decks/new">
             <Button size="sm" variant="default">
               <Plus className="w-4 h-4" />
-              New deck
+              Ny kortstokk
             </Button>
           </Link>
           {email && (
             <span className="hidden sm:block text-xs text-slate-400 truncate max-w-[160px]">{email}</span>
           )}
           <Link href="/settings">
-            <Button size="icon" variant="ghost" title="Settings">
+            <Button size="icon" variant="ghost" title="Innstillinger">
               <Settings className="w-4 h-4" />
             </Button>
           </Link>
-          <Button size="icon" variant="ghost" onClick={handleSignOut} title="Sign out">
+          <Button size="icon" variant="ghost" onClick={handleSignOut} title="Logg ut">
             <LogOut className="w-4 h-4" />
           </Button>
         </div>

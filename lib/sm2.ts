@@ -68,9 +68,9 @@ export function formatDueDate(dueDate: string): string {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-  if (dueDate <= today) return 'Due now';
-  if (dueDate === tomorrowStr) return 'Tomorrow';
+  if (dueDate <= today) return 'Forfaller nå';
+  if (dueDate === tomorrowStr) return 'I morgen';
 
   const days = Math.round((new Date(dueDate).getTime() - new Date(today).getTime()) / (1000 * 60 * 60 * 24));
-  return `In ${days} days`;
+  return `Om ${days} dager`;
 }

@@ -33,7 +33,7 @@ export default function DeckCard({ deck, onDelete }: DeckCardProps) {
           <h3 className="font-semibold text-slate-900 text-base truncate group-hover:text-violet-700 transition-colors">
             {deck.title}
           </h3>
-          <p className="text-sm text-slate-500 mt-0.5">{deck.card_count ?? 0} cards</p>
+          <p className="text-sm text-slate-500 mt-0.5">{deck.card_count ?? 0} kort</p>
         </Link>
         <div className="relative" ref={menuRef}>
           <Button
@@ -51,7 +51,7 @@ export default function DeckCard({ deck, onDelete }: DeckCardProps) {
                 className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
-                Delete deck
+                Slett kortstokk
               </button>
             </div>
           )}
@@ -60,13 +60,13 @@ export default function DeckCard({ deck, onDelete }: DeckCardProps) {
 
       <div className="flex items-center gap-2 flex-wrap">
         {(deck.due_count ?? 0) > 0 && (
-          <Badge variant="warning">{deck.due_count} due</Badge>
+          <Badge variant="warning">{deck.due_count} forfaller</Badge>
         )}
         {(deck.due_count ?? 0) === 0 && (deck.card_count ?? 0) > 0 && (
-          <Badge variant="success">Up to date</Badge>
+          <Badge variant="success">Oppdatert</Badge>
         )}
         {(deck.card_count ?? 0) === 0 && (
-          <Badge variant="secondary">Empty</Badge>
+          <Badge variant="secondary">Tom</Badge>
         )}
       </div>
 
@@ -79,7 +79,7 @@ export default function DeckCard({ deck, onDelete }: DeckCardProps) {
             disabled={(deck.due_count ?? 0) === 0}
           >
             <Clock className="w-4 h-4" />
-            Study ({deck.due_count ?? 0})
+            Studer ({deck.due_count ?? 0})
           </Button>
         </Link>
         <Link href={`/decks/${deck.id}`}>

@@ -158,16 +158,16 @@ export default function NewDeckPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Create new deck</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Add cards manually, or use AI to generate them from text</p>
+            <h1 className="text-2xl font-bold text-slate-900">Lag ny kortstokk</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Legg til kort manuelt, eller bruk AI til å generere fra tekst</p>
           </div>
         </div>
 
         {/* Deck title */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-4">
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Deck title</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Tittel på kortstokk</label>
           <Input
-            placeholder="e.g. Anatomy — Heart & Circulatory System"
+            placeholder="f.eks. Anatomi — Hjerte og sirkulasjonssystemet"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             autoFocus
@@ -180,7 +180,7 @@ export default function NewDeckPage() {
             <div key={i} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 group">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Card {i + 1}</span>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kort {i + 1}</span>
                   <div className="flex rounded-lg border border-slate-200 p-0.5 gap-0.5">
                     <button
                       type="button"
@@ -207,7 +207,7 @@ export default function NewDeckPage() {
                 <div className="space-y-2">
                   <div>
                     <label className="block text-xs font-medium text-violet-600 mb-1">
-                      Cloze text <span className="font-normal text-slate-400">— wrap blanks in {'{{c1::answer}}'}</span>
+                      Cloze-tekst <span className="font-normal text-slate-400">— bruk {'{{c1::svar}}'} for hull</span>
                     </label>
                     <Textarea
                       placeholder="e.g. Ved hjertesvikt er {{c1::BNP}} ofte forhøyet."
@@ -217,9 +217,9 @@ export default function NewDeckPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-emerald-600 mb-1">Extra info (optional)</label>
+                    <label className="block text-xs font-medium text-emerald-600 mb-1">Ekstra info (valgfritt)</label>
                     <Textarea
-                      placeholder="Additional explanation shown after reveal"
+                      placeholder="Tilleggsforklaring som vises etter avsløring"
                       value={card.back}
                       onChange={(e) => updateCard(i, 'back', e.target.value)}
                       className="min-h-[50px] text-sm"
@@ -229,18 +229,18 @@ export default function NewDeckPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-violet-600 mb-1">Question</label>
+                    <label className="block text-xs font-medium text-violet-600 mb-1">Spørsmål</label>
                     <Textarea
-                      placeholder="e.g. What is the mitochondria?"
+                      placeholder="f.eks. Hva er mitokondrien?"
                       value={card.front}
                       onChange={(e) => updateCard(i, 'front', e.target.value)}
                       className="min-h-[80px] text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-emerald-600 mb-1">Answer</label>
+                    <label className="block text-xs font-medium text-emerald-600 mb-1">Svar</label>
                     <Textarea
-                      placeholder="e.g. The powerhouse of the cell"
+                      placeholder="f.eks. Cellens kraftverk"
                       value={card.back}
                       onChange={(e) => updateCard(i, 'back', e.target.value)}
                       className="min-h-[80px] text-sm"
@@ -260,7 +260,7 @@ export default function NewDeckPage() {
                   ))}
                   <input
                     type="text"
-                    placeholder="Add tag..."
+                    placeholder="Legg til tag..."
                     value={card.tagInput ?? ''}
                     onChange={(e) => updateCard(i, 'tagInput', e.target.value)}
                     onKeyDown={(e) => {
@@ -281,7 +281,7 @@ export default function NewDeckPage() {
           className="w-full flex items-center justify-center gap-2 py-3.5 border-2 border-dashed border-slate-300 rounded-2xl text-sm text-slate-500 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50 transition-all mb-4"
         >
           <Plus className="w-4 h-4" />
-          Add card
+          Legg til kort
         </button>
 
         {/* AI accordion */}
@@ -292,8 +292,8 @@ export default function NewDeckPage() {
           >
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-violet-500" />
-              Generate cards with AI
-              <span className="text-xs font-normal text-slate-400">— paste text and AI extracts flashcards</span>
+              Generer kort med AI
+              <span className="text-xs font-normal text-slate-400">— lim inn tekst og AI lager flashcards</span>
             </div>
             {aiOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </button>
@@ -301,20 +301,20 @@ export default function NewDeckPage() {
           {aiOpen && (
             <div className="px-5 pb-5 border-t border-slate-100 pt-4 space-y-3">
               <Textarea
-                placeholder="Paste lecture notes, textbook excerpts, article text... AI will extract key Q&A pairs and add them to your card list."
+                placeholder="Lim inn forelesningsnotater, læreboktekst, artikler... AI henter ut nøkkelspørsmål og legger dem til i kortlisten din."
                 value={aiText}
                 onChange={(e) => setAiText(e.target.value)}
                 className="min-h-[160px] leading-relaxed"
                 maxLength={8000}
               />
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">Style</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5">Stil</label>
                 <div className="flex flex-wrap gap-1.5">
                   {([
-                    { value: 'balanced', label: 'Balanced' },
+                    { value: 'balanced', label: 'Balansert' },
                     { value: 'high-yield', label: 'High-yield' },
-                    { value: 'exam-focus', label: 'Exam focus' },
-                    { value: 'clinical-case', label: 'Clinical case' },
+                    { value: 'exam-focus', label: 'Eksamensfokus' },
+                    { value: 'clinical-case', label: 'Klinisk kasus' },
                   ] as const).map((s) => (
                     <button
                       key={s.value}
@@ -332,7 +332,7 @@ export default function NewDeckPage() {
                   disabled={aiGenerating || aiText.trim().length < 20}
                 >
                   <Sparkles className="w-4 h-4" />
-                  {aiGenerating ? 'Generating...' : 'Generate & add cards'}
+                  {aiGenerating ? 'Genererer...' : 'Generer og legg til kort'}
                 </Button>
               </div>
               {aiError && <p className="text-sm text-red-500">{aiError}</p>}
@@ -345,7 +345,7 @@ export default function NewDeckPage() {
         {/* Save */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-slate-500">
-            {validCards.length} card{validCards.length !== 1 ? 's' : ''} ready
+            {validCards.length} kort klare
           </p>
           <Button
             onClick={handleSave}
@@ -353,7 +353,7 @@ export default function NewDeckPage() {
             size="lg"
           >
             <Check className="w-5 h-5" />
-            {saving ? 'Saving...' : 'Save deck'}
+            {saving ? 'Lagrer...' : 'Lagre kortstokk'}
           </Button>
         </div>
       </main>

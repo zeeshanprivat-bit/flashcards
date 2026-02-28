@@ -201,13 +201,13 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
                   </button>
                 </div>
               )}
-              <p className="text-sm text-slate-500 mt-0.5">{cards.length} cards · {dueCount} due</p>
+              <p className="text-sm text-slate-500 mt-0.5">{cards.length} kort · {dueCount} forfaller</p>
             </div>
           </div>
           <Link href={`/study/${deck.id}`}>
             <Button disabled={dueCount === 0}>
               <Clock className="w-4 h-4" />
-              Study ({dueCount})
+              Studer ({dueCount})
             </Button>
           </Link>
         </div>
@@ -220,7 +220,7 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
           >
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-violet-500" />
-              Generate cards from text
+              Generer kort fra tekst
             </div>
             {aiOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </button>
@@ -230,7 +230,7 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
               {aiPreview.length === 0 ? (
                 <>
                   <Textarea
-                    placeholder="Paste lecture notes, article text, or any content — AI will extract flashcards from it."
+                    placeholder="Lim inn forelesningsnotater, artikler eller annet innhold — AI lager flashcards fra det."
                     value={aiText}
                     onChange={(e) => setAiText(e.target.value)}
                     className="min-h-[140px] leading-relaxed"
@@ -243,14 +243,14 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
                       disabled={aiGenerating || aiText.trim().length < 20}
                     >
                       <Sparkles className="w-4 h-4" />
-                      {aiGenerating ? 'Generating...' : 'Generate cards'}
+                      {aiGenerating ? 'Genererer...' : 'Generer kort'}
                     </Button>
                   </div>
                   {aiError && <p className="text-sm text-red-500">{aiError}</p>}
                 </>
               ) : (
                 <>
-                  <p className="text-sm text-slate-600">{aiPreview.length} cards generated — review then add to deck</p>
+                  <p className="text-sm text-slate-600">{aiPreview.length} kort generert — se gjennom og legg til i kortstokken</p>
                   <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                     {aiPreview.map((c, i) => (
                       <div key={i} className="grid grid-cols-2 gap-3 bg-slate-50 rounded-xl p-3">
@@ -267,11 +267,11 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
                   </div>
                   <div className="flex gap-2 justify-end">
                     <Button variant="outline" size="sm" onClick={() => setAiPreview([])}>
-                      <X className="w-4 h-4" /> Regenerate
+                      <X className="w-4 h-4" /> Generer på nytt
                     </Button>
                     <Button size="sm" onClick={handleAiSave} disabled={aiSaving}>
                       <Check className="w-4 h-4" />
-                      {aiSaving ? 'Adding...' : `Add ${aiPreview.length} cards to deck`}
+                      {aiSaving ? 'Legger til...' : `Legg til ${aiPreview.length} kort`}
                     </Button>
                   </div>
                 </>
@@ -287,7 +287,7 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
             <button
               onClick={() => setFilterTag(null)}
               className={`px-2.5 py-0.5 text-xs font-medium rounded-full border transition-all ${!filterTag ? 'bg-violet-600 text-white border-violet-600' : 'border-slate-200 text-slate-500 hover:border-violet-300'}`}
-            >All</button>
+            >Alle</button>
             {allTags.map((tag) => (
               <button
                 key={tag}
@@ -302,7 +302,7 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
         <div className="space-y-3">
           {filteredCards.map((card) => {
             const review = Array.isArray(card.review) ? card.review[0] : card.review;
-            const due = review ? formatDueDate(review.due_date) : 'Due now';
+            const due = review ? formatDueDate(review.due_date) : 'Forfaller nå';
             const isEditing = editingId === card.id;
 
             return (
@@ -311,20 +311,20 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-violet-600 mb-1">Question</label>
+                        <label className="block text-xs font-medium text-violet-600 mb-1">Spørsmål</label>
                         <Textarea value={editFront} onChange={(e) => setEditFront(e.target.value)} className="min-h-[80px] text-sm" />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-emerald-600 mb-1">Answer</label>
+                        <label className="block text-xs font-medium text-emerald-600 mb-1">Svar</label>
                         <Textarea value={editBack} onChange={(e) => setEditBack(e.target.value)} className="min-h-[80px] text-sm" />
                       </div>
                     </div>
                     <div className="flex gap-2 justify-end">
                       <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
-                        <X className="w-4 h-4" /> Cancel
+                        <X className="w-4 h-4" /> Avbryt
                       </Button>
                       <Button size="sm" onClick={() => saveEdit(card)}>
-                        <Check className="w-4 h-4" /> Save
+                        <Check className="w-4 h-4" /> Lagre
                       </Button>
                     </div>
                   </div>
@@ -351,7 +351,7 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
                       </div>
                     </div>
                     <div className="mt-3 pt-3 border-t border-slate-100 flex items-center flex-wrap gap-1.5">
-                      <Badge variant={due === 'Due now' ? 'warning' : 'secondary'} className="text-xs">
+                      <Badge variant={due === 'Forfaller nå' ? 'warning' : 'secondary'} className="text-xs">
                         {due}
                       </Badge>
                       {card.type === 'cloze' && (
@@ -375,23 +375,23 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
           {/* Add new card */}
           {addingNew ? (
             <div className="bg-white rounded-2xl border border-violet-200 shadow-sm p-5">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">New card</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Nytt kort</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                 <div>
-                  <label className="block text-xs font-medium text-violet-600 mb-1">Question</label>
-                  <Textarea value={newFront} onChange={(e) => setNewFront(e.target.value)} placeholder="Enter question..." className="min-h-[80px] text-sm" />
+                  <label className="block text-xs font-medium text-violet-600 mb-1">Spørsmål</label>
+                  <Textarea value={newFront} onChange={(e) => setNewFront(e.target.value)} placeholder="Skriv spørsmål..." className="min-h-[80px] text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-emerald-600 mb-1">Answer</label>
-                  <Textarea value={newBack} onChange={(e) => setNewBack(e.target.value)} placeholder="Enter answer..." className="min-h-[80px] text-sm" />
+                  <label className="block text-xs font-medium text-emerald-600 mb-1">Svar</label>
+                  <Textarea value={newBack} onChange={(e) => setNewBack(e.target.value)} placeholder="Skriv svar..." className="min-h-[80px] text-sm" />
                 </div>
               </div>
               <div className="flex gap-2 justify-end">
                 <Button variant="ghost" size="sm" onClick={() => { setAddingNew(false); setNewFront(''); setNewBack(''); }}>
-                  <X className="w-4 h-4" /> Cancel
+                  <X className="w-4 h-4" /> Avbryt
                 </Button>
                 <Button size="sm" onClick={addCard} disabled={!newFront.trim() || !newBack.trim()}>
-                  <Check className="w-4 h-4" /> Add card
+                  <Check className="w-4 h-4" /> Legg til kort
                 </Button>
               </div>
             </div>
@@ -401,7 +401,7 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
               className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-slate-300 rounded-2xl text-sm text-slate-500 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50 transition-all"
             >
               <Plus className="w-4 h-4" />
-              Add card
+              Legg til kort
             </button>
           )}
         </div>

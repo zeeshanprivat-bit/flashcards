@@ -10,9 +10,9 @@ const flashcardsSchema = z.object({
       type: z.enum(['basic', 'cloze']).describe('Card type: basic (Q→A) or cloze (fill-in-the-blank)'),
       front: z.string().describe('The question (for basic) or a summary prompt (for cloze)'),
       back: z.string().describe('The answer or explanation (1-3 sentences)'),
-      cloze_text: z.string().optional().describe('For cloze cards: full sentence with blanks in {{c1::answer}} format'),
+      cloze_text: z.string().nullable().describe('For cloze cards: full sentence with blanks in {{c1::answer}} format. null for basic cards.'),
       tags: z.array(z.string()).describe('1-3 relevant topic tags, lowercase'),
-      source_snippet: z.string().optional().describe('The part of the input text this card was derived from'),
+      source_snippet: z.string().nullable().describe('The part of the input text this card was derived from'),
     })
   ).min(1).max(20),
 });

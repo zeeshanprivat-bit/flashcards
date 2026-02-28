@@ -96,15 +96,15 @@ export default function SettingsClient({ userId, email, settings: initial }: Pro
           <Link href="/dashboard">
             <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Innstillinger</h1>
         </div>
 
         {/* Study settings */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Study settings</h2>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4">Studieinnstillinger</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Daily review goal</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Daglig repetisjonsmål</label>
               <Input
                 type="number"
                 min={1}
@@ -114,7 +114,7 @@ export default function SettingsClient({ userId, email, settings: initial }: Pro
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">New cards per day</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Nye kort per dag</label>
               <Input
                 type="number"
                 min={0}
@@ -127,24 +127,24 @@ export default function SettingsClient({ userId, email, settings: initial }: Pro
           <div className="flex items-center gap-2 mt-4">
             <Button onClick={handleSaveSettings} disabled={saving} size="sm">
               <Save className="w-4 h-4" />
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? 'Lagrer...' : 'Lagre'}
             </Button>
-            {saved && <span className="text-xs text-emerald-600 font-medium">Saved!</span>}
+            {saved && <span className="text-xs text-emerald-600 font-medium">Lagret!</span>}
           </div>
         </div>
 
         {/* Import / Export */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Import & Export</h2>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4">Import og eksport</h2>
           <div className="flex flex-wrap gap-2 mb-3">
             <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
-              <Download className="w-4 h-4" /> Export CSV
+              <Download className="w-4 h-4" /> Eksporter CSV
             </Button>
             <Button variant="outline" size="sm" onClick={() => handleExport('json')}>
-              <Download className="w-4 h-4" /> Export JSON
+              <Download className="w-4 h-4" /> Eksporter JSON
             </Button>
             <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-              <Upload className="w-4 h-4" /> Import CSV
+              <Upload className="w-4 h-4" /> Importer CSV
             </Button>
             <input ref={fileRef} type="file" accept=".csv" onChange={handleImport} className="hidden" />
           </div>
@@ -152,27 +152,27 @@ export default function SettingsClient({ userId, email, settings: initial }: Pro
             <p className={`text-xs ${importStatus.startsWith('Error') ? 'text-red-500' : 'text-emerald-600'}`}>{importStatus}</p>
           )}
           <p className="text-xs text-slate-400 mt-2">
-            CSV format: front, back, type (optional), cloze_text (optional), tags (optional, comma-separated)
+            CSV-format: front, back, type (valgfritt), cloze_text (valgfritt), tags (valgfritt, kommaseparert)
           </p>
         </div>
 
         {/* Danger zone */}
         <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-5">
-          <h2 className="text-sm font-semibold text-red-600 mb-2">Danger zone</h2>
+          <h2 className="text-sm font-semibold text-red-600 mb-2">Faresone</h2>
           <p className="text-xs text-slate-500 mb-4">
-            Delete your account and all associated data. This action is permanent and cannot be undone.
+            Slett kontoen din og all tilhørende data. Denne handlingen er permanent og kan ikke angres.
           </p>
           {!showDelete ? (
             <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDelete(true)}>
-              <Trash2 className="w-4 h-4" /> Delete all my data
+              <Trash2 className="w-4 h-4" /> Slett alle mine data
             </Button>
           ) : (
             <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
               <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
-              <p className="text-xs text-red-700 flex-1">Are you sure? All decks, cards, and review history will be permanently deleted.</p>
-              <Button size="sm" variant="outline" onClick={() => setShowDelete(false)}>Cancel</Button>
+              <p className="text-xs text-red-700 flex-1">Er du sikker? Alle kortstokker, kort og repetisjonshistorikk slettes permanent.</p>
+              <Button size="sm" variant="outline" onClick={() => setShowDelete(false)}>Avbryt</Button>
               <Button size="sm" className="bg-red-600 hover:bg-red-700" onClick={handleDeleteAccount} disabled={deleting}>
-                {deleting ? 'Deleting...' : 'Confirm delete'}
+                {deleting ? 'Sletter...' : 'Bekreft sletting'}
               </Button>
             </div>
           )}
