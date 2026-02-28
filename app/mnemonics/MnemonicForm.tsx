@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Save, ArrowLeft, ImagePlus, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, ImagePlus, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { compressImage } from '@/lib/compress-image';
@@ -34,6 +34,7 @@ export default function MnemonicForm({ mode, initial, linkedCardIds = [], userCa
   const router = useRouter();
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
 
   const [title, setTitle] = useState(initial?.title || '');
   const [mnemonicText, setMnemonicText] = useState(initial?.mnemonic_text || '');
@@ -47,46 +48,34 @@ export default function MnemonicForm({ mode, initial, linkedCardIds = [], userCa
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [showMore, setShowMore] = useState(mode === 'edit');
   const [selectedCards, setSelectedCards] = useState<string[]>(linkedCardIds);
   const [cardSearch, setCardSearch] = useState('');
 
   function addTag() {
     const t = tagInput.trim().toLowerCase();
-    if (t && !tags.includes(t)) {
-      setTags([...tags, t]);
-    }
+    if (t && !tags.includes(t)) setTags([...tags, t]);
     setTagInput('');
-  }
-
-  function removeTag(tag: string) {
-    setTags(tags.filter(t => t !== tag));
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
     setError('');
-
     try {
       const compressed = await compressImage(file, 800, 0.7);
-      const fileName = `${Date.now()}-${file.name.replace(/\.[^.]+$/, '')}.webp`;
-
+      const fileName = `${Date.now()}.webp`;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Ikke innlogget');
-
       const path = `${user.id}/${fileName}`;
       const { error: uploadError } = await supabase.storage
         .from('mnemonic-images')
         .upload(path, compressed, { contentType: 'image/webp' });
-
       if (uploadError) throw uploadError;
-
       const { data: { publicUrl } } = supabase.storage
         .from('mnemonic-images')
         .getPublicUrl(path);
-
       setImageUrl(publicUrl);
       setImagePreview(URL.createObjectURL(compressed));
     } catch (err: any) {
@@ -96,26 +85,25 @@ export default function MnemonicForm({ mode, initial, linkedCardIds = [], userCa
     }
   }
 
-  function removeImage() {
-    setImageUrl(null);
-    setImagePreview(null);
-  }
-
   async function handleSave() {
-    if (!title.trim() || !mnemonicText.trim() || !topic.trim()) {
-      setError('Tittel, huskeregeltekst og emne er påkrevd');
+    if (!mnemonicText.trim()) {
+      setError('Skriv inn huskeregelen');
+      textRef.current?.focus();
       return;
     }
 
     setSaving(true);
     setError('');
 
+    // Auto-generate title from first line if empty
+    const autoTitle = title.trim() || mnemonicText.trim().split('\n')[0].slice(0, 60);
+
     const body = {
-      title,
+      title: autoTitle,
       mnemonic_text: mnemonicText,
-      explanation,
-      topic,
-      subject,
+      explanation: explanation || null,
+      topic: topic || 'Generelt',
+      subject: subject || 'general',
       tags,
       image_url: imageUrl,
       linked_card_ids: selectedCards,
@@ -124,17 +112,11 @@ export default function MnemonicForm({ mode, initial, linkedCardIds = [], userCa
     try {
       const url = mode === 'edit' ? `/api/mnemonics/${initial?.id}` : '/api/mnemonics';
       const method = mode === 'edit' ? 'PUT' : 'POST';
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Lagring feilet');
       }
-
       const data = await res.json();
       router.push(`/mnemonics/${data.mnemonic.id}`);
     } catch (err: any) {
@@ -144,121 +126,67 @@ export default function MnemonicForm({ mode, initial, linkedCardIds = [], userCa
     }
   }
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleSave();
+    }
+  }
+
   const filteredCards = userCards.filter(c =>
     !cardSearch || c.front.toLowerCase().includes(cardSearch.toLowerCase())
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="max-w-xl mx-auto px-4 sm:px-6 py-6">
+      <div className="flex items-center gap-3 mb-4">
         <Link href="/mnemonics">
           <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
         </Link>
-        <h1 className="text-xl font-bold text-slate-900">
+        <h1 className="text-lg font-bold text-slate-900">
           {mode === 'create' ? 'Ny huskeregel' : 'Rediger huskeregel'}
         </h1>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg mb-4">
-          {error}
-        </div>
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2 rounded-lg mb-3">{error}</div>
       )}
 
-      <div className="space-y-5">
-        {/* Title */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Tittel *</label>
-          <input
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            placeholder="F.eks. 'Kranialnervene'"
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-          />
-        </div>
+      <div className="space-y-3" onKeyDown={handleKeyDown}>
+        {/* Main: mnemonic text — the primary input */}
+        <textarea
+          ref={textRef}
+          value={mnemonicText}
+          onChange={e => setMnemonicText(e.target.value)}
+          placeholder="Skriv huskeregelen din her..."
+          rows={4}
+          autoFocus
+          className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-y"
+        />
 
-        {/* Mnemonic text */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Huskeregeltekst *</label>
-          <textarea
-            value={mnemonicText}
-            onChange={e => setMnemonicText(e.target.value)}
-            placeholder="F.eks. 'Oh, Oh, Oh, To Touch And Feel Very Green Vegetables, AH!'"
-            rows={3}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-y"
-          />
-        </div>
+        {/* Title — optional, auto-generated if empty */}
+        <input
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          placeholder="Tittel (valgfritt — lages automatisk)"
+          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+        />
 
-        {/* Explanation */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Forklaring</label>
-          <textarea
-            value={explanation}
-            onChange={e => setExplanation(e.target.value)}
-            placeholder="Hva betyr hver bokstav/del?"
-            rows={4}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-y"
-          />
-        </div>
+        {/* Explanation — optional */}
+        <textarea
+          value={explanation}
+          onChange={e => setExplanation(e.target.value)}
+          placeholder="Forklaring (valgfritt)"
+          rows={2}
+          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-y"
+        />
 
-        {/* Subject + Topic */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Fag *</label>
-            <select
-              value={subject}
-              onChange={e => setSubject(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-            >
-              {SUBJECTS.map(s => (
-                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Emne *</label>
-            <input
-              value={topic}
-              onChange={e => setTopic(e.target.value)}
-              placeholder="F.eks. 'Kranialnerver'"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-            />
-          </div>
-        </div>
-
-        {/* Tags */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Emneord</label>
-          <div className="flex gap-2 mb-2 flex-wrap">
-            {tags.map(t => (
-              <span key={t} className="bg-violet-50 text-violet-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                {t}
-                <button onClick={() => removeTag(t)}><X className="w-3 h-3" /></button>
-              </span>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <input
-              value={tagInput}
-              onChange={e => setTagInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-              placeholder="Legg til emneord..."
-              className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-            />
-            <Button variant="outline" size="sm" type="button" onClick={addTag}>Legg til</Button>
-          </div>
-        </div>
-
-        {/* Image upload */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Bilde</label>
+        {/* Image row */}
+        <div className="flex items-center gap-2">
           {imagePreview ? (
-            <div className="relative inline-block">
-              <img src={imagePreview} alt="Preview" className="max-h-48 rounded-lg border border-slate-200" />
-              <button
-                onClick={removeImage}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-              >
+            <div className="relative">
+              <img src={imagePreview} alt="" className="h-16 rounded-lg border border-slate-200" />
+              <button onClick={() => { setImageUrl(null); setImagePreview(null); }} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5">
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -266,71 +194,100 @@ export default function MnemonicForm({ mode, initial, linkedCardIds = [], userCa
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="flex items-center gap-2 border-2 border-dashed border-slate-200 rounded-lg px-4 py-8 w-full text-sm text-slate-500 hover:border-violet-300 hover:bg-violet-50 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-slate-500 border border-slate-200 rounded-lg px-3 py-2 hover:border-violet-300 hover:text-violet-600 transition-colors"
             >
-              {uploading ? (
-                <><Loader2 className="w-5 h-5 animate-spin" /> Komprimerer og laster opp...</>
-              ) : (
-                <><ImagePlus className="w-5 h-5" /> Klikk for å laste opp bilde (komprimeres automatisk)</>
-              )}
+              {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5" />}
+              {uploading ? 'Laster opp...' : 'Legg til bilde'}
             </button>
           )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
-          />
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
         </div>
-
-        {/* Link to flashcards */}
-        {userCards.length > 0 && (
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Knytt til kort ({selectedCards.length} valgt)
-            </label>
-            <input
-              value={cardSearch}
-              onChange={e => setCardSearch(e.target.value)}
-              placeholder="Søk i kort..."
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-violet-500"
-            />
-            <div className="max-h-40 overflow-y-auto border border-slate-200 rounded-lg divide-y divide-slate-100">
-              {filteredCards.slice(0, 20).map(card => (
-                <label key={card.id} className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selectedCards.includes(card.id)}
-                    onChange={e => {
-                      if (e.target.checked) setSelectedCards([...selectedCards, card.id]);
-                      else setSelectedCards(selectedCards.filter(id => id !== card.id));
-                    }}
-                    className="rounded"
-                  />
-                  <span className="truncate">{card.front}</span>
-                  {card.deck_title && (
-                    <span className="text-xs text-slate-400 ml-auto whitespace-nowrap">{card.deck_title}</span>
-                  )}
-                </label>
-              ))}
-              {filteredCards.length === 0 && (
-                <p className="text-xs text-slate-400 px-3 py-2">Ingen kort funnet</p>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Save button */}
-        <div className="flex gap-3 pt-4 border-t border-slate-200">
-          <Button onClick={handleSave} disabled={saving} className="flex-1">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {mode === 'create' ? 'Opprett huskeregel' : 'Lagre endringer'}
-          </Button>
-          <Link href="/mnemonics">
-            <Button variant="outline">Avbryt</Button>
-          </Link>
-        </div>
+        <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+          {saving ? 'Lagrer...' : 'Lagre huskeregel'}
+          <span className="text-xs opacity-60 ml-2">⌘↵</span>
+        </Button>
+
+        {/* Expandable: more options */}
+        <button
+          onClick={() => setShowMore(!showMore)}
+          className="flex items-center gap-1 text-xs text-slate-400 hover:text-violet-600 mx-auto"
+        >
+          {showMore ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          {showMore ? 'Skjul alternativer' : 'Flere alternativer (fag, emneord, kort-kobling)'}
+        </button>
+
+        {showMore && (
+          <div className="space-y-3 pt-2 border-t border-slate-100">
+            {/* Subject + Topic */}
+            <div className="grid grid-cols-2 gap-3">
+              <select
+                value={subject}
+                onChange={e => setSubject(e.target.value)}
+                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              >
+                {SUBJECTS.map(s => (
+                  <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                ))}
+              </select>
+              <input
+                value={topic}
+                onChange={e => setTopic(e.target.value)}
+                placeholder="Emne"
+                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+
+            {/* Tags */}
+            <div>
+              <div className="flex gap-1.5 mb-1.5 flex-wrap">
+                {tags.map(t => (
+                  <span key={t} className="bg-violet-50 text-violet-700 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                    {t}
+                    <button onClick={() => setTags(tags.filter(x => x !== t))}><X className="w-2.5 h-2.5" /></button>
+                  </span>
+                ))}
+              </div>
+              <input
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
+                placeholder="Legg til emneord (trykk Enter)"
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+
+            {/* Link to flashcards */}
+            {userCards.length > 0 && (
+              <div>
+                <input
+                  value={cardSearch}
+                  onChange={e => setCardSearch(e.target.value)}
+                  placeholder="Søk og knytt til kort..."
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-1.5 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                />
+                <div className="max-h-32 overflow-y-auto border border-slate-200 rounded-lg divide-y divide-slate-100">
+                  {filteredCards.slice(0, 15).map(card => (
+                    <label key={card.id} className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-50 cursor-pointer text-xs">
+                      <input
+                        type="checkbox"
+                        checked={selectedCards.includes(card.id)}
+                        onChange={e => {
+                          if (e.target.checked) setSelectedCards([...selectedCards, card.id]);
+                          else setSelectedCards(selectedCards.filter(id => id !== card.id));
+                        }}
+                        className="rounded"
+                      />
+                      <span className="truncate">{card.front}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

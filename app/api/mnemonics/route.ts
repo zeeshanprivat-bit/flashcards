@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const { title, mnemonic_text, explanation, topic, subject, tags, image_url, linked_card_ids } = body;
 
-  if (!title?.trim() || !mnemonic_text?.trim() || !topic?.trim()) {
-    return NextResponse.json({ error: 'Tittel, tekst og emne er påkrevd' }, { status: 400 });
+  if (!title?.trim() || !mnemonic_text?.trim()) {
+    return NextResponse.json({ error: 'Tittel og tekst er påkrevd' }, { status: 400 });
   }
 
   const { data, error } = await supabase.from('mnemonics').insert({
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     title: title.trim(),
     mnemonic_text: mnemonic_text.trim(),
     explanation: explanation?.trim() || null,
-    topic: topic.trim(),
+    topic: (topic || 'Generelt').trim(),
     subject: (subject || 'general').trim().toLowerCase(),
     tags: tags || [],
     image_url: image_url || null,
