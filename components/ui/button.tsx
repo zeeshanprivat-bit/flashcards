@@ -4,27 +4,27 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-violet-600 text-white shadow hover:bg-violet-700 active:scale-[0.98]',
-        destructive: 'bg-red-500 text-white shadow-sm hover:bg-red-600 active:scale-[0.98]',
-        outline: 'border border-slate-200 bg-white shadow-sm hover:bg-slate-50 text-slate-800 active:scale-[0.98]',
-        secondary: 'bg-slate-100 text-slate-800 shadow-sm hover:bg-slate-200 active:scale-[0.98]',
-        ghost: 'hover:bg-slate-100 text-slate-700',
-        link: 'text-violet-600 underline-offset-4 hover:underline',
-        again: 'bg-red-500 text-white shadow hover:bg-red-600 active:scale-[0.97]',
-        hard: 'bg-orange-500 text-white shadow hover:bg-orange-600 active:scale-[0.97]',
-        good: 'bg-emerald-500 text-white shadow hover:bg-emerald-600 active:scale-[0.97]',
-        easy: 'bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-[0.97]',
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] shadow-sm',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98] shadow-sm',
+        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98]',
+        ghost: 'hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
+        link: 'text-primary underline-offset-4 hover:underline',
+        again: 'bg-error text-error-foreground hover:bg-error/90 active:scale-[0.97] shadow-sm',
+        hard: 'bg-warning text-warning-foreground hover:bg-warning/90 active:scale-[0.97] shadow-sm',
+        good: 'bg-success text-success-foreground hover:bg-success/90 active:scale-[0.97] shadow-sm',
+        easy: 'bg-primary/10 text-primary hover:bg-primary/20 active:scale-[0.97] shadow-sm',
       },
       size: {
-        default: 'h-10 px-5 py-2',
-        sm: 'h-8 px-3 text-xs',
-        lg: 'h-12 px-8 text-base',
-        xl: 'h-14 px-10 text-base',
-        icon: 'h-9 w-9',
+        default: 'h-10 px-4 py-2',
+        sm: 'h-9 px-3 text-xs',
+        lg: 'h-11 px-8 text-base',
+        xl: 'h-12 px-10 text-lg',
+        icon: 'h-10 w-10',
       },
     },
     defaultVariants: {
