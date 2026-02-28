@@ -271,69 +271,51 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, cards, em
         </div>
 
         {/* Topics Overview Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Temaoversikt med repetisjonsanbefalinger</h2>
+        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+          <h2 className="text-sm font-medium text-slate-800 mb-4">Temaoversikt</h2>
           {sortedTopics.length === 0 ? (
             <p className="text-sm text-slate-400 text-center py-8">Ingen repetisjoner ennå</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="text-left py-3 px-2 font-medium text-slate-700">Tema</th>
-                    <th className="text-left py-3 px-2 font-medium text-slate-700">Sist repetert</th>
-                    <th className="text-center py-3 px-2 font-medium text-slate-700">Dager siden</th>
-                    <th className="text-left py-3 px-2 font-medium text-slate-700">Neste repetisjon</th>
-                    <th className="text-center py-3 px-2 font-medium text-slate-700">Prioritet</th>
+                  <tr className="border-b border-slate-100">
+                    <th className="text-left py-2 px-3 font-medium text-slate-600">Tema</th>
+                    <th className="text-center py-2 px-3 font-medium text-slate-600">Sist repetert</th>
+                    <th className="text-center py-2 px-3 font-medium text-slate-600">Dager siden</th>
+                    <th className="text-center py-2 px-3 font-medium text-slate-600">Neste repetisjon</th>
+                    <th className="text-center py-2 px-3 font-medium text-slate-600">Prioritet</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedTopics.map((topic) => {
-                    const priorityColors = {
-                      høy: 'bg-red-100 text-red-700 border-red-200',
-                      middels: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                      lav: 'bg-green-100 text-green-700 border-green-200',
-                    };
-                    
                     const lastReviewedDate = topic.lastReviewed.getTime() === 0 
                       ? 'Aldri' 
                       : topic.lastReviewed.toLocaleDateString('no-NO');
                     
                     return (
-                      <tr key={topic.topic} className="border-b border-slate-100 hover:bg-slate-50">
-                        <td className="py-3 px-2">
-                          <div>
-                            <div className="font-medium text-slate-800">{topic.topic}</div>
-                            <div className="text-xs text-slate-500 mt-0.5">
-                              {topic.reviewCount} repetisjoner · {topic.cardCount} kort
-                            </div>
+                      <tr key={topic.topic} className="border-b border-slate-50">
+                        <td className="py-3 px-3">
+                          <div className="font-medium text-slate-800">{topic.topic}</div>
+                          <div className="text-xs text-slate-400">
+                            {topic.reviewCount} · {topic.cardCount} kort
                           </div>
                         </td>
-                        <td className="py-3 px-2 text-slate-600">
+                        <td className="py-3 px-3 text-center text-slate-600">
                           {lastReviewedDate}
                         </td>
-                        <td className="py-3 px-2 text-center">
-                          <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${
-                            topic.daysSinceReview === 0 ? 'bg-violet-100 text-violet-700' :
-                            topic.daysSinceReview <= 3 ? 'bg-blue-100 text-blue-700' :
-                            topic.daysSinceReview <= 7 ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {topic.daysSinceReview === 0 ? 'I dag' : topic.daysSinceReview}
-                          </span>
+                        <td className="py-3 px-3 text-center">
+                          {topic.daysSinceReview === 0 ? 'I dag' : topic.daysSinceReview}
                         </td>
-                        <td className="py-3 px-2">
+                        <td className="py-3 px-3 text-center text-slate-600">
+                          {topic.nextReview}
+                        </td>
+                        <td className="py-3 px-3 text-center">
                           <span className={`text-xs font-medium ${
-                            topic.nextReview === 'Umiddelbart' ? 'text-red-600' :
-                            topic.nextReview === 'I dag' ? 'text-orange-600' :
-                            'text-slate-600'
+                            topic.priority === 'høy' ? 'text-red-600' :
+                            topic.priority === 'middels' ? 'text-yellow-600' :
+                            'text-green-600'
                           }`}>
-                            {topic.nextReview}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2">
-                          <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium border ${priorityColors[topic.priority]}`}>
-                            {topic.priority === 'høy' && '⚡ '}
                             {topic.priority.charAt(0).toUpperCase() + topic.priority.slice(1)}
                           </span>
                         </td>
@@ -342,24 +324,6 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, cards, em
                   })}
                 </tbody>
               </table>
-              
-              {/* Priority Legend */}
-              <div className="mt-4 pt-4 border-t border-slate-200">
-                <div className="flex items-center justify-center gap-6 text-xs text-slate-500">
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                    <span>Høy prioritet (overdue / lav ease)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                    <span>Middels prioritet (due i dag)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    <span>Lav prioritet (ikke due)</span>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
         </div>
