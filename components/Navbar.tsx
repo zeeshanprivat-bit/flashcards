@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Brain, LogOut, Plus, BarChart3, Settings } from 'lucide-react';
+import { Brain, LogOut, Plus, BarChart3, Settings, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 
@@ -35,6 +35,12 @@ export default function Navbar({ email }: NavbarProps) {
             <Button size="sm" variant="ghost">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Statistikk</span>
+            </Button>
+          </Link>
+          <Link href="/chat">
+            <Button size="sm" variant="ghost">
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">AI Chat</span>
             </Button>
           </Link>
           <Link href="/decks/new">
