@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { generateText } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
@@ -52,8 +52,9 @@ export async function POST(request: NextRequest) {
   const styleGuide = STYLE_INSTRUCTIONS[style as Style] ?? STYLE_INSTRUCTIONS.balanced;
 
   try {
-    const gateway = createOpenAI({
-      apiKey: process.env.AI_GATEWAY_API_KEY,
+    const gateway = createOpenAICompatible({
+      name: 'vercel-gateway',
+      apiKey: process.env.AI_GATEWAY_API_KEY!,
       baseURL: 'https://ai-gateway.vercel.sh/v1',
     });
 
