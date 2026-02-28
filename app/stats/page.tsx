@@ -23,20 +23,21 @@ export default async function StatsPage() {
   // Fetch all reviews for ease distribution
   const { data: reviews } = await supabase
     .from('reviews')
-    .select('ease_factor, interval, lapses, repetitions')
+    .select('card_id, ease_factor, interval, lapses, repetitions, due_date')
     .eq('user_id', user.id);
 
-  // Total card count
-  const { count: totalCards } = await supabase
+  // Total card count and topic data
+  const { data: cards } = await supabase
     .from('cards')
-    .select('*', { count: 'exact', head: true })
+    .select('id, front, tags, deck_id, decks(title)')
     .eq('user_id', user.id);
 
   return (
     <StatsClient
       reviewLogs={reviewLogs ?? []}
       reviews={reviews ?? []}
-      totalCards={totalCards ?? 0}
+      totalCards={cards?.length ?? 0}
+      cards={cards ?? []}
       email={user.email}
     />
   );

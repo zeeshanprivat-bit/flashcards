@@ -7,16 +7,19 @@ import { Button } from '@/components/ui/button';
 import type { ReviewLog } from '@/lib/types';
 
 interface ReviewSummary {
+  card_id: string;
   ease_factor: number;
   interval: number;
   lapses: number;
   repetitions: number;
+  due_date: string;
 }
 
 interface Props {
   reviewLogs: ReviewLog[];
   reviews: ReviewSummary[];
   totalCards: number;
+  cards: { id: string; front: string; tags: string[]; deck_id: string; decks: { title: string }[] }[];
   email?: string;
 }
 
@@ -52,11 +55,56 @@ function getRetention(logs: ReviewLog[]): number {
   return Math.round((good / logs.length) * 100);
 }
 
-export default function StatsClient({ reviewLogs, reviews, totalCards, email }: Props) {
+export default function StatsClient({ reviewLogs, reviews, totalCards, cards, email }: Props) {
   const byDate = groupByDate(reviewLogs);
   const streak = getStreak(byDate);
   const retention = getRetention(reviewLogs);
   const totalReviews = reviewLogs.length;
+
+  // Topics analysis
+  const topicStats = new Map<string, { count: number; lastReviewed: Date; dueCount: number }>();
+  
+  // Count reviews per topic and track last review time
+  reviewLogs.forEach(log => {
+    const card = cards.find(c => c.id === log.card_id);
+    if (card) {
+      const topics = card.tags.length > 0 ? card.tags : [card.decks[0]?.title || 'Ukjent'];
+      topics.forEach(topic => {
+        const existing = topicStats.get(topic) || { count: 0, lastReviewed: new Date(0), dueCount: 0 };
+        existing.count++;
+        const reviewDate = new Date(log.reviewed_at);
+        if (reviewDate > existing.lastReviewed) {
+          existing.lastReviewed = reviewDate;
+        }
+        topicStats.set(topic, existing);
+      });
+    }
+  });
+
+  // Count cards due per topic
+  const today = new Date().toISOString().split('T')[0];
+  cards.forEach(card => {
+    const review = reviews.find(r => r.card_id === card.id);
+    if (review && review.due_date <= today) {
+      const topics = card.tags.length > 0 ? card.tags : [card.decks[0]?.title || 'Ukjent'];
+      topics.forEach(topic => {
+        const existing = topicStats.get(topic) || { count: 0, lastReviewed: new Date(0), dueCount: 0 };
+        existing.dueCount++;
+        topicStats.set(topic, existing);
+      });
+    }
+  });
+
+  // Sort topics by review count, then format for display
+  const sortedTopics = Array.from(topicStats.entries())
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 8)
+    .map(([topic, stats]) => ({
+      topic,
+      reviewCount: stats.count,
+      daysSinceReview: Math.floor((Date.now() - stats.lastReviewed.getTime()) / (1000 * 60 * 60 * 24)),
+      dueCount: stats.dueCount,
+    }));
 
   // Reviews per day (last 14 days)
   const last14: { date: string; count: number; good: number; again: number }[] = [];
@@ -144,6 +192,32 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, email }: 
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Topics section */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
+          <h2 className="text-sm font-semibold text-slate-700 mb-4">Temaer du har repetert</h2>
+          {sortedTopics.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-4">Ingen repetisjoner ennå</p>
+          ) : (
+            <div className="space-y-2">
+              {sortedTopics.map(({ topic, reviewCount, daysSinceReview, dueCount }) => (
+                <div key={topic} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex-1">
+                    <div className="font-medium text-slate-800 text-sm">{topic}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">
+                      {reviewCount} repetisjoner · sist for {daysSinceReview === 0 ? 'i dag' : daysSinceReview === 1 ? 'i går' : `${daysSinceReview} dager siden`}
+                    </div>
+                  </div>
+                  {dueCount > 0 && (
+                    <div className="bg-violet-100 text-violet-700 text-xs px-2 py-1 rounded-full">
+                      {dueCount} forfaller
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
