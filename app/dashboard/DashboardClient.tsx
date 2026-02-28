@@ -33,150 +33,153 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
   const allCaughtUp = decks.length > 0 && totalDue === 0 && totalCards > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar email={email} />
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Velkommen tilbake!</h1>
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        {/* Welcome */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">Velkommen tilbake!</h1>
           <p className="text-gray-600">Klar til å fortsette læringsreisen din?</p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-3xl font-bold text-gray-900">{decks.length}</span>
-            </div>
-            <h3 className="font-semibold text-gray-900">Kortstokker</h3>
-            <p className="text-sm text-gray-500">Totalt antall</p>
+        {/* Quick Stats - Simple Bar */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <div className="text-2xl font-bold text-gray-900">{decks.length}</div>
+            <div className="text-xs text-gray-600">Kortstokker</div>
           </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-3xl font-bold text-gray-900">{totalCards}</span>
-            </div>
-            <h3 className="font-semibold text-gray-900">Totalt kort</h3>
-            <p className="text-sm text-gray-500">I alle kortstokker</p>
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <div className="text-2xl font-bold text-gray-900">{totalCards}</div>
+            <div className="text-xs text-gray-600">Totalt kort</div>
           </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-3xl font-bold text-gray-900">{totalDue}</span>
-            </div>
-            <h3 className="font-semibold text-gray-900">Klar for repetisjon</h3>
-            <p className="text-sm text-gray-500">Kort som forfaller i dag</p>
+          <div className="text-center p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <div className="text-2xl font-bold text-amber-700">{totalDue}</div>
+            <div className="text-xs text-amber-600">Klar for repetisjon</div>
           </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center">
-                <Flame className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-3xl font-bold text-gray-900">{decksWithDue.length}</span>
-            </div>
-            <h3 className="font-semibold text-gray-900">Aktive kortstokker</h3>
-            <p className="text-sm text-gray-500">Med forfallende kort</p>
+          <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+            <div className="text-2xl font-bold text-purple-700">{decksWithDue.length}</div>
+            <div className="text-xs text-purple-600">Aktive kortstokker</div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        {/* Priority Action */}
+        {totalDue > 0 && (
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold">{totalDue} kort forfaller</div>
+                <div className="text-sm opacity-90">{decksWithDue.length} kortstokk{decksWithDue.length !== 1 ? 'er' : ''} å repetere</div>
+              </div>
+              <Link href="/study">
+                <Button className="bg-white text-purple-600 hover:bg-gray-100">
+                  Start økt
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 mb-8">
           <Link href="/decks/new" className="flex-1">
-            <Button className="w-full gap-2 h-12 text-base bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-              <Plus className="w-5 h-5" />
+            <Button className="w-full bg-gray-900 text-white hover:bg-gray-800">
+              <Plus className="w-4 h-4 mr-2" />
               Opprett ny kortstokk
             </Button>
           </Link>
           <Link href="/study" className="flex-1">
-            <Button variant="outline" className="w-full gap-2 h-12 text-base border-2 border-gray-300 hover:border-gray-400">
-              <Brain className="w-5 h-5" />
+            <Button variant="outline" className="w-full border-2 border-gray-300 hover:border-gray-400">
+              <Brain className="w-4 h-4 mr-2" />
               Start økt
             </Button>
           </Link>
         </div>
 
-        {/* Status Alert */}
-        {decks.length > 0 && (
+        {/* Priority Decks */}
+        {totalDue > 0 && (
           <div className="mb-8">
-            {allCaughtUp ? (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <div>
-                    <p className="font-semibold text-emerald-900">Alt oppdatert!</p>
-                    <p className="text-sm text-emerald-700">Ingen kort forfaller nå. Kom tilbake senere eller legg til nye kort.</p>
-                  </div>
-                </div>
-              </div>
-            ) : totalDue > 0 && (
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-8">
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-purple-700">{totalDue}</p>
-                      <p className="text-sm text-purple-600">kort forfaller</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-blue-700">{decksWithDue.length}</p>
-                      <p className="text-sm text-blue-600">kortstokker</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Prioriterte kortstokker</h2>
+            <div className="space-y-3">
+              {decksWithDue.slice(0, 3).map((deck) => (
+                <div key={deck.id} className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-gray-900">{deck.title}</div>
+                      <div className="text-sm text-gray-500">{deck.due_count} forfaller</div>
                     </div>
                   </div>
-                  <Link href="/study">
-                    <Button className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                      <Brain className="w-4 h-4" />
-                      Start økt
+                  <Link href={`/study/${deck.id}`}>
+                    <Button size="sm" className="bg-amber-100 text-amber-700 hover:bg-amber-200">
+                      Studer ({deck.due_count})
                     </Button>
                   </Link>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Decks Section */}
+        {/* All Decks */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {decks.length === 0 ? 'Kom i gang' : 'Dine kortstokker'}
-            </h2>
-            {decks.length > 6 && (
-              <p className="text-sm text-gray-500">{decks.length} kortstokker</p>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-gray-900">Alle kortstokker</h2>
+            {decks.length > 0 && (
+              <span className="text-sm text-gray-500">{decks.length} kortstokker</span>
             )}
           </div>
 
           {/* Empty State */}
           {decks.length === 0 && (
-            <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Ingen kortstokker ennå</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">Opprett din første kortstokk for å begynne å lære med AI-genererte flashcards</p>
+            <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+              <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen kortstokker ennå</h3>
+              <p className="text-gray-600 mb-4">Opprett din første kortstokk for å begynne å lære</p>
               <Link href="/decks/new">
-                <Button className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                  <Plus className="w-4 h-4" />
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
                   Opprett kortstokk
                 </Button>
               </Link>
             </div>
           )}
 
-          {/* Deck Grid */}
+          {/* Deck List */}
           {decks.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-2">
               {decks.map((deck) => (
-                <DeckCard key={deck.id} deck={deck} onDelete={handleDelete} />
+                <div key={deck.id} className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${
+                      (deck.due_count ?? 0) > 0 ? 'bg-amber-500' : 'bg-gray-300'
+                    }`}></div>
+                    <div>
+                      <div className="font-medium text-gray-900">{deck.title}</div>
+                      <div className="text-sm text-gray-500">{deck.card_count} kort</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {(deck.due_count ?? 0) > 0 && (
+                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
+                        {deck.due_count} forfaller
+                      </span>
+                    )}
+                    <Link href={`/decks/${deck.id}`}>
+                      <Button variant="ghost" size="sm">
+                        Åpne
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDelete(deck.id)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      Slett
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           )}
