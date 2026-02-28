@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { text, deckTitle, style = 'balanced' } = await request.json();
-  if (!text || text.trim().length < 10) {
+  if (!text || text.trim().length < 5) {
     return NextResponse.json({ error: 'Text too short' }, { status: 400 });
   }
   if (text.length > 8000) {
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     const { text: aiResponse } = await generateText({
       model: gateway('openai/gpt-4o-mini'),
-      system: `You are a flashcard generator for medical students. The user pastes a single concept — often already structured as a question and answer. Your job is to create EXACTLY ONE flashcard from it.
+      system: `You are a flashcard generator for medical students. The user pastes text containing multiple questions and answers. Your job is to extract ALL Q&A pairs and create a flashcard for each.
 You MUST respond with ONLY valid JSON, no markdown, no code fences, no extra text.
 
 Response format (strict JSON):
@@ -68,8 +68,8 @@ Response format (strict JSON):
   "cards": [
     {
       "type": "basic",
-      "front": "the question (use the question from the text if present, otherwise create one)",
-      "back": "the answer (clean, concise, use bullet points with \\n if the answer has multiple items)",
+      "front": "the question (extracted directly from text)",
+      "back": "the answer (short, on-point, 1-2 sentences max)",
       "cloze_text": null,
       "tags": ["tag1", "tag2"],
       "source_snippet": null
@@ -78,14 +78,15 @@ Response format (strict JSON):
 }
 
 Rules:
-- Always return EXACTLY 1 card — never more
-- If the text already contains a clear question + answer, extract them directly
-- Keep the front as the exact question if one is present
-- Keep the back faithful to the answer in the text, preserving key details and bullet points
-- Use \\n to separate bullet points in the back field
-- Include 1-3 lowercase topic tags
-- Do not add information not present in the text`,
-      prompt: `Create one flashcard from this text:\n\n${text}`,
+- Create a flashcard for EVERY question-answer pair in the text
+- Extract questions and answers exactly as they appear
+- Keep answers SHORT and ON-POINT — 1-2 sentences maximum
+- If answers are long, summarize to the key point
+- Use \\n to separate bullet points only if absolutely necessary
+- Include 1-3 lowercase topic tags per card based on content
+- Do not add information not present in the text
+- Maximum 20 cards total`,
+      prompt: `Create flashcards from all Q&A pairs in this text:\n\n${text}`,
       temperature: 0.3,
     });
 

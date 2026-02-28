@@ -81,7 +81,7 @@ export default function DeckDetailClient({ deck, cards: initialCards, email }: P
   }
 
   async function handleAiGenerate() {
-    if (!aiText.trim() || aiText.trim().length < 20) return;
+    if (!aiText.trim() || aiText.trim().length < 5) return;
     setAiGenerating(true);
     setAiError('');
     setAiPreview([]);
