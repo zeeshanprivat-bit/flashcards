@@ -13,7 +13,7 @@ const cardSchema = z.object({
   source_snippet: z.string().nullable().optional(),
 });
 
-const flashcardsSchema = z.object({ cards: z.array(cardSchema).min(1).max(20) });
+const flashcardsSchema = z.object({ cards: z.array(cardSchema).min(1).max(100) });
 
 type Style = 'balanced' | 'high-yield' | 'exam-focus' | 'clinical-case';
 
@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
   if (!text || text.trim().length < 5) {
     return NextResponse.json({ error: 'Text too short' }, { status: 400 });
   }
-  if (text.length > 8000) {
-    return NextResponse.json({ error: 'Text too long (max 8000 chars)' }, { status: 400 });
+  if (text.length > 20000) {
+    return NextResponse.json({ error: 'Text too long (max 20000 chars)' }, { status: 400 });
   }
 
   // Rate limit: max 20 generations per user per day
@@ -85,7 +85,7 @@ Rules:
 - Use \\n to separate bullet points only if absolutely necessary
 - Include 1-3 lowercase topic tags per card based on content
 - Do not add information not present in the text
-- Maximum 20 cards total`,
+- Maximum 100 cards total`,
       prompt: `Create flashcards from all Q&A pairs in this text:\n\n${text}`,
       temperature: 0.3,
     });
