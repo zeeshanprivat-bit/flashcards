@@ -61,50 +61,126 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, cards, em
   const retention = getRetention(reviewLogs);
   const totalReviews = reviewLogs.length;
 
-  // Topics analysis
-  const topicStats = new Map<string, { count: number; lastReviewed: Date; dueCount: number }>();
+  // Advanced topics analysis with spaced repetition recommendations
+  interface TopicAnalysis {
+    topic: string;
+    lastReviewed: Date;
+    reviewCount: number;
+    avgEase: number;
+    avgInterval: number;
+    dueCount: number;
+    overdueCount: number;
+    cardCount: number;
+  }
+
+  const topicStats = new Map<string, TopicAnalysis>();
   
-  // Count reviews per topic and track last review time
+  // Initialize topics from all cards
+  cards.forEach(card => {
+    const topics = card.tags.length > 0 ? card.tags : [card.decks[0]?.title || 'Ukjent'];
+    topics.forEach(topic => {
+      if (!topicStats.has(topic)) {
+        topicStats.set(topic, {
+          topic,
+          lastReviewed: new Date(0),
+          reviewCount: 0,
+          avgEase: 2.5,
+          avgInterval: 0,
+          dueCount: 0,
+          overdueCount: 0,
+          cardCount: 0,
+        });
+      }
+      topicStats.get(topic)!.cardCount++;
+    });
+  });
+
+  // Process review logs
   reviewLogs.forEach(log => {
     const card = cards.find(c => c.id === log.card_id);
     if (card) {
       const topics = card.tags.length > 0 ? card.tags : [card.decks[0]?.title || 'Ukjent'];
+      const reviewDate = new Date(log.reviewed_at);
+      
       topics.forEach(topic => {
-        const existing = topicStats.get(topic) || { count: 0, lastReviewed: new Date(0), dueCount: 0 };
-        existing.count++;
-        const reviewDate = new Date(log.reviewed_at);
-        if (reviewDate > existing.lastReviewed) {
-          existing.lastReviewed = reviewDate;
+        const stats = topicStats.get(topic)!;
+        stats.reviewCount++;
+        if (reviewDate > stats.lastReviewed) {
+          stats.lastReviewed = reviewDate;
         }
-        topicStats.set(topic, existing);
       });
     }
   });
 
-  // Count cards due per topic
+  // Process current review states
   const today = new Date().toISOString().split('T')[0];
   cards.forEach(card => {
     const review = reviews.find(r => r.card_id === card.id);
-    if (review && review.due_date <= today) {
+    if (review) {
       const topics = card.tags.length > 0 ? card.tags : [card.decks[0]?.title || 'Ukjent'];
+      
       topics.forEach(topic => {
-        const existing = topicStats.get(topic) || { count: 0, lastReviewed: new Date(0), dueCount: 0 };
-        existing.dueCount++;
-        topicStats.set(topic, existing);
+        const stats = topicStats.get(topic)!;
+        stats.avgEase = (stats.avgEase + review.ease_factor) / 2;
+        stats.avgInterval = (stats.avgInterval + review.interval) / 2;
+        
+        if (review.due_date <= today) {
+          stats.dueCount++;
+          const daysOverdue = Math.floor((Date.now() - new Date(review.due_date).getTime()) / (1000 * 60 * 60 * 24));
+          if (daysOverdue > 0) stats.overdueCount++;
+        }
       });
     }
   });
 
-  // Sort topics by review count, then format for display
-  const sortedTopics = Array.from(topicStats.entries())
-    .sort((a, b) => b[1].count - a[1].count)
-    .slice(0, 8)
-    .map(([topic, stats]) => ({
-      topic,
-      reviewCount: stats.count,
-      daysSinceReview: Math.floor((Date.now() - stats.lastReviewed.getTime()) / (1000 * 60 * 60 * 24)),
-      dueCount: stats.dueCount,
-    }));
+  // Calculate priority and format for display
+  const sortedTopics = Array.from(topicStats.values())
+    .map(stats => {
+      const daysSince = Math.floor((Date.now() - stats.lastReviewed.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Priority calculation based on spaced repetition principles
+      let priority: 'lav' | 'middels' | 'høy';
+      let nextReview: string;
+      
+      if (stats.dueCount === 0) {
+        // No cards due - calculate next review based on average interval
+        const nextDays = Math.max(stats.avgInterval * 2, 7); // Rough estimate
+        nextReview = new Date(Date.now() + nextDays * 24 * 60 * 60 * 1000).toLocaleDateString('no-NO');
+        priority = 'lav';
+      } else if (stats.overdueCount > 0) {
+        // Overdue cards - high priority
+        nextReview = 'Umiddelbart';
+        priority = 'høy';
+      } else {
+        // Due but not overdue - medium priority
+        nextReview = 'I dag';
+        priority = 'middels';
+      }
+      
+      // Adjust priority based on ease factor (lower ease = higher priority)
+      if (stats.avgEase < 2.0 && priority === 'middels') priority = 'høy';
+      if (stats.avgEase > 2.8 && priority === 'høy') priority = 'middels';
+      
+      return {
+        topic: stats.topic,
+        lastReviewed: stats.lastReviewed,
+        reviewCount: stats.reviewCount,
+        daysSinceReview: daysSince,
+        nextReview,
+        priority,
+        dueCount: stats.dueCount,
+        overdueCount: stats.overdueCount,
+        cardCount: stats.cardCount,
+        avgEase: stats.avgEase,
+      };
+    })
+    .sort((a, b) => {
+      // Sort by priority (high first), then by days since review
+      const priorityOrder = { høy: 3, middels: 2, lav: 1 };
+      const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+      if (priorityDiff !== 0) return priorityDiff;
+      return b.daysSinceReview - a.daysSinceReview;
+    });
 
   // Reviews per day (last 14 days)
   const last14: { date: string; count: number; good: number; again: number }[] = [];
@@ -194,28 +270,96 @@ export default function StatsClient({ reviewLogs, reviews, totalCards, cards, em
           </div>
         </div>
 
-        {/* Topics section */}
+        {/* Topics Overview Table */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Temaer du har repetert</h2>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4">Temaoversikt med repetisjonsanbefalinger</h2>
           {sortedTopics.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-4">Ingen repetisjoner ennå</p>
+            <p className="text-sm text-slate-400 text-center py-8">Ingen repetisjoner ennå</p>
           ) : (
-            <div className="space-y-2">
-              {sortedTopics.map(({ topic, reviewCount, daysSinceReview, dueCount }) => (
-                <div key={topic} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div className="flex-1">
-                    <div className="font-medium text-slate-800 text-sm">{topic}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">
-                      {reviewCount} repetisjoner · sist for {daysSinceReview === 0 ? 'i dag' : daysSinceReview === 1 ? 'i går' : `${daysSinceReview} dager siden`}
-                    </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200">
+                    <th className="text-left py-3 px-2 font-medium text-slate-700">Tema</th>
+                    <th className="text-left py-3 px-2 font-medium text-slate-700">Sist repetert</th>
+                    <th className="text-center py-3 px-2 font-medium text-slate-700">Dager siden</th>
+                    <th className="text-left py-3 px-2 font-medium text-slate-700">Neste repetisjon</th>
+                    <th className="text-center py-3 px-2 font-medium text-slate-700">Prioritet</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedTopics.map((topic) => {
+                    const priorityColors = {
+                      høy: 'bg-red-100 text-red-700 border-red-200',
+                      middels: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+                      lav: 'bg-green-100 text-green-700 border-green-200',
+                    };
+                    
+                    const lastReviewedDate = topic.lastReviewed.getTime() === 0 
+                      ? 'Aldri' 
+                      : topic.lastReviewed.toLocaleDateString('no-NO');
+                    
+                    return (
+                      <tr key={topic.topic} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="py-3 px-2">
+                          <div>
+                            <div className="font-medium text-slate-800">{topic.topic}</div>
+                            <div className="text-xs text-slate-500 mt-0.5">
+                              {topic.reviewCount} repetisjoner · {topic.cardCount} kort
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-2 text-slate-600">
+                          {lastReviewedDate}
+                        </td>
+                        <td className="py-3 px-2 text-center">
+                          <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${
+                            topic.daysSinceReview === 0 ? 'bg-violet-100 text-violet-700' :
+                            topic.daysSinceReview <= 3 ? 'bg-blue-100 text-blue-700' :
+                            topic.daysSinceReview <= 7 ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {topic.daysSinceReview === 0 ? 'I dag' : topic.daysSinceReview}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2">
+                          <span className={`text-xs font-medium ${
+                            topic.nextReview === 'Umiddelbart' ? 'text-red-600' :
+                            topic.nextReview === 'I dag' ? 'text-orange-600' :
+                            'text-slate-600'
+                          }`}>
+                            {topic.nextReview}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2">
+                          <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium border ${priorityColors[topic.priority]}`}>
+                            {topic.priority === 'høy' && '⚡ '}
+                            {topic.priority.charAt(0).toUpperCase() + topic.priority.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              
+              {/* Priority Legend */}
+              <div className="mt-4 pt-4 border-t border-slate-200">
+                <div className="flex items-center justify-center gap-6 text-xs text-slate-500">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                    <span>Høy prioritet (overdue / lav ease)</span>
                   </div>
-                  {dueCount > 0 && (
-                    <div className="bg-violet-100 text-violet-700 text-xs px-2 py-1 rounded-full">
-                      {dueCount} forfaller
-                    </div>
-                  )}
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                    <span>Middels prioritet (due i dag)</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span>Lav prioritet (ikke due)</span>
+                  </div>
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </div>
