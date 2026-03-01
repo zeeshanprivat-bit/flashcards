@@ -33,90 +33,94 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
   const allCaughtUp = decks.length > 0 && totalDue === 0 && totalCards > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <Navbar email={email} />
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Welcome Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Velkommen tilbake!</h1>
-          <p className="text-gray-600 mt-1">Klar til å fortsette læringsreisen din?</p>
+          <h1 className="text-3xl font-bold text-slate-900">Velkommen tilbake!</h1>
+          <p className="text-slate-600 mt-1">Klar til å fortsette læringsreisen din?</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
             <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-blue-600" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">{decks.length}</span>
+              <span className="text-2xl font-bold text-slate-900">{decks.length}</span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600">Kortstokker</h3>
-            <p className="text-xs text-gray-500">Totalt antall</p>
+            <h3 className="text-sm font-medium text-slate-700">Kortstokker</h3>
+            <p className="text-xs text-slate-500">Totalt antall</p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
             <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">{totalCards}</span>
+              <span className="text-2xl font-bold text-slate-900">{totalCards}</span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600">Totalt kort</h3>
-            <p className="text-xs text-gray-500">I alle kortstokker</p>
+            <h3 className="text-sm font-medium text-slate-700">Totalt kort</h3>
+            <p className="text-xs text-slate-500">I alle kortstokker</p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
             <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
                 <Clock className="w-5 h-5 text-amber-600" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">{totalDue}</span>
+              <span className="text-2xl font-bold text-slate-900">{totalDue}</span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600">Klar for repetisjon</h3>
-            <p className="text-xs text-gray-500">Kort som forfaller i dag</p>
+            <h3 className="text-sm font-medium text-slate-700">Klar for repetisjon</h3>
+            <p className="text-xs text-slate-500">Kort som forfaller i dag</p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
             <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <Flame className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
+                <Flame className="w-5 h-5 text-indigo-600" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">{decksWithDue.length}</span>
+              <span className="text-2xl font-bold text-slate-900">{decksWithDue.length}</span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600">Aktive kortstokker</h3>
-            <p className="text-xs text-gray-500">Med forfallende kort</p>
+            <h3 className="text-sm font-medium text-slate-700">Aktive kortstokker</h3>
+            <p className="text-xs text-slate-500">Med forfallende kort</p>
           </div>
         </div>
 
         {/* Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold mb-1">Opprett ny kortstokk</h3>
-                <p className="text-blue-100 text-sm">Start med AI-genererte flashcards</p>
+                <h3 className="text-lg font-semibold text-slate-900 mb-1">Opprett ny kortstokk</h3>
+                <p className="text-slate-600 text-sm">Start med AI-genererte flashcards</p>
               </div>
-              <Plus className="w-8 h-8 text-blue-200" />
+              <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center">
+                <Plus className="w-6 h-6 text-blue-600" />
+              </div>
             </div>
             <Link href="/decks/new">
-              <Button className="w-full bg-white text-blue-600 hover:bg-blue-50 font-medium">
+              <Button className="w-full bg-blue-600 text-white hover:bg-blue-700 font-medium">
                 Opprett kortstokk
               </Button>
             </Link>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold mb-1">Start økt</h3>
-                <p className="text-purple-100 text-sm">Repetisjon med mellomrom</p>
+                <h3 className="text-lg font-semibold text-slate-900 mb-1">Start økt</h3>
+                <p className="text-slate-600 text-sm">Repetisjon med mellomrom</p>
               </div>
-              <Brain className="w-8 h-8 text-purple-200" />
+              <div className="w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center">
+                <Brain className="w-6 h-6 text-indigo-600" />
+              </div>
             </div>
             <Link href="/study">
-              <Button className="w-full bg-white text-purple-600 hover:bg-purple-50 font-medium">
+              <Button className="w-full bg-indigo-600 text-white hover:bg-indigo-700 font-medium">
                 Start økt
               </Button>
             </Link>
@@ -125,19 +129,19 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
 
         {/* Priority Alert */}
         {totalDue > 0 && (
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 mb-8">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
                   <Clock className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">{totalDue} kort forfaller</h3>
-                  <p className="text-sm text-gray-600">{decksWithDue.length} kortstokk{decksWithDue.length !== 1 ? 'er' : ''} å repetere</p>
+                  <h3 className="text-lg font-semibold text-slate-900">{totalDue} kort forfaller</h3>
+                  <p className="text-sm text-slate-600">{decksWithDue.length} kortstokk{decksWithDue.length !== 1 ? 'er' : ''} å repetere</p>
                 </div>
               </div>
               <Link href="/study">
-                <Button className="bg-amber-500 text-white hover:bg-amber-600">
+                <Button className="bg-amber-600 text-white hover:bg-amber-700">
                   Start økt
                 </Button>
               </Link>
@@ -148,22 +152,22 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
         {/* Decks Section */}
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-slate-900">
               {decks.length === 0 ? 'Kom i gang' : 'Dine kortstokker'}
             </h2>
             {decks.length > 0 && (
-              <span className="text-sm text-gray-500">{decks.length} kortstokker</span>
+              <span className="text-sm text-slate-500">{decks.length} kortstokker</span>
             )}
           </div>
 
           {/* Empty State */}
           {decks.length === 0 && (
-            <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-300">
-              <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8 text-gray-400" />
+            <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-slate-300">
+              <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="w-8 h-8 text-slate-400" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Ingen kortstokker ennå</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">Opprett din første kortstokk for å begynne å lære med AI-genererte flashcards</p>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Ingen kortstokker ennå</h3>
+              <p className="text-slate-600 mb-6 max-w-md mx-auto">Opprett din første kortstokk for å begynne å lære med AI-genererte flashcards</p>
               <Link href="/decks/new">
                 <Button className="bg-blue-600 text-white hover:bg-blue-700">
                   <Plus className="w-4 h-4 mr-2" />
@@ -177,11 +181,11 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
           {decks.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {decks.map((deck) => (
-                <div key={deck.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div key={deck.id} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{deck.title}</h3>
-                      <p className="text-sm text-gray-500">{deck.card_count} kort</p>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-1">{deck.title}</h3>
+                      <p className="text-sm text-slate-500">{deck.card_count} kort</p>
                     </div>
                     {(deck.due_count ?? 0) > 0 && (
                       <div className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full font-medium">
@@ -197,7 +201,7 @@ export default function DashboardClient({ decks: initialDecks, email }: Props) {
                       </Button>
                     </Link>
                     <Link href={`/decks/${deck.id}`}>
-                      <Button variant="outline" size="sm" className="border-gray-300">
+                      <Button variant="outline" size="sm" className="border-slate-300">
                         Åpne
                       </Button>
                     </Link>

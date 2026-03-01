@@ -2,21 +2,21 @@
 
 @layer base {
   :root {
-    /* Modern color system - more vibrant */
-    --color-primary: 262 83% 58%;
+    /* Professional color system */
+    --color-primary: 221 83% 53%;
     --color-primary-foreground: 0 0% 98%;
-    --color-secondary: 220 14% 96%;
-    --color-secondary-foreground: 220 9% 46%;
+    --color-secondary: 210 40% 96%;
+    --color-secondary-foreground: 222.2 84% 4.9%;
     --color-background: 0 0% 100%;
-    --color-foreground: 222 84% 5%;
-    --color-muted: 220 14% 96%;
-    --color-muted-foreground: 220 9% 46%;
-    --color-border: 220 13% 91%;
-    --color-input: 220 13% 91%;
-    --color-ring: 262 83% 58%;
-    --color-success: 142 71% 45%;
-    --color-warning: 38 92% 50%;
-    --color-error: 0 84% 60%;
+    --color-foreground: 222.2 84% 4.9%;
+    --color-muted: 210 40% 96%;
+    --color-muted-foreground: 215.4 16.3% 46.9%;
+    --color-border: 214.3 31.8% 91.4%;
+    --color-input: 214.3 31.8% 91.4%;
+    --color-ring: 221 83% 53%;
+    --color-success: 142 76% 36%;
+    --color-warning: 43 96% 56%;
+    --color-error: 0 84.2% 60.2%;
     
     /* Typography scale */
     --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
