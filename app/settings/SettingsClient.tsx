@@ -1,183 +1,374 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Save, Download, Upload, Trash2, AlertTriangle } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
+import {
+  ArrowLeft, RefreshCw, User, Mail, Shield, Trash2, AlertTriangle, Check, CalendarDays
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import type { UserSettings } from '@/lib/types';
 
 interface Props {
   userId: string;
-  email?: string;
-  settings: UserSettings;
+  email: string;
+  createdAt: string;
 }
 
-export default function SettingsClient({ userId, email, settings: initial }: Props) {
+export default function SettingsClient({ userId, email, createdAt }: Props) {
   const supabase = createClient();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
-  const [dailyGoal, setDailyGoal] = useState(initial.daily_goal);
-  const [newCardsPerDay, setNewCardsPerDay] = useState(initial.new_cards_per_day);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [importStatus, setImportStatus] = useState('');
+  // Change password
+  const [pwStep, setPwStep] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [pwError, setPwError] = useState('');
+
+  // Delete account
   const [showDelete, setShowDelete] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleting, setDeleting] = useState(false);
 
-  async function handleSaveSettings() {
-    setSaving(true);
-    setSaved(false);
-    await supabase.from('user_settings').upsert({
-      user_id: userId,
-      daily_goal: dailyGoal,
-      new_cards_per_day: newCardsPerDay,
-      updated_at: new Date().toISOString(),
+  const memberSince = createdAt
+    ? new Date(createdAt).toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })
+    : '–';
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+  }
+
+  async function handlePasswordReset() {
+    setPwStep('sending');
+    setPwError('');
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
     });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  }
-
-  async function handleExport(format: 'csv' | 'json') {
-    const res = await fetch(`/api/export?format=${format}`);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `flashcards-export.${format}`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImportStatus('Importing...');
-    const text = await file.text();
-    try {
-      const res = await fetch('/api/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ csv: text }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setImportStatus(`Imported ${data.imported} cards successfully!`);
-    } catch (err: any) {
-      setImportStatus(`Error: ${err.message}`);
+    if (error) {
+      setPwError(error.message);
+      setPwStep('idle');
+    } else {
+      setPwStep('sent');
     }
-    if (fileRef.current) fileRef.current.value = '';
   }
 
   async function handleDeleteAccount() {
+    if (deleteConfirm !== email) return;
     setDeleting(true);
-    // Delete all user data
-    await supabase.from('review_logs').delete().eq('user_id', userId);
-    await supabase.from('reviews').delete().eq('user_id', userId);
-    await supabase.from('cards').delete().eq('user_id', userId);
-    await supabase.from('decks').delete().eq('user_id', userId);
-    await supabase.from('ai_usage').delete().eq('user_id', userId);
-    await supabase.from('ai_generation_jobs').delete().eq('user_id', userId);
-    await supabase.from('user_settings').delete().eq('user_id', userId);
-
-    // Sign out
+    // Delete revisions first (foreign key), then topics
+    await supabase.from('revisions').delete().eq('user_id', userId);
+    await supabase.from('topics').delete().eq('user_id', userId);
     await supabase.auth.signOut();
     window.location.href = '/';
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar email={email} />
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
+    <div style={{ minHeight: '100vh', background: 'var(--rn-cream)', fontFamily: 'var(--font-inter)' }}>
+
+      {/* ── Nav ──────────────────────────────────────────────────────────── */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 50,
+        background: 'rgba(247,244,239,0.88)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--rn-linen)',
+        padding: '0 24px',
+        height: 60,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <span style={{ fontSize: 20, fontFamily: 'var(--font-lora)', fontWeight: 700, color: 'var(--rn-charcoal)', letterSpacing: '-0.01em' }}>
+            ReviNord
+          </span>
+          <span style={{ width: 1, height: 18, background: 'var(--rn-linen)' }} />
+          <span style={{ fontSize: 14, color: 'var(--rn-charcoal-light)', fontWeight: 500 }}>
+            Innstillinger
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <Link
+            href="/dashboard"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '7px 14px',
+              borderRadius: 9,
+              border: '1.5px solid var(--rn-linen)',
+              background: 'white',
+              color: 'var(--rn-charcoal-light)',
+              fontSize: 13, fontWeight: 500,
+              textDecoration: 'none',
+            }}
+          >
+            <ArrowLeft size={13} />
+            Dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900">Innstillinger</h1>
+          <button
+            onClick={handleSignOut}
+            title="Logg ut"
+            style={{
+              width: 36, height: 36, borderRadius: 9,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--rn-charcoal-light)',
+              border: '1.5px solid var(--rn-linen)',
+              background: 'white',
+              cursor: 'pointer',
+            }}
+          >
+            <RefreshCw size={15} />
+          </button>
         </div>
+      </nav>
 
-        {/* Study settings */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Studieinnstillinger</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Daglig repetisjonsmål</label>
-              <Input
-                type="number"
-                min={1}
-                max={500}
-                value={dailyGoal}
-                onChange={(e) => setDailyGoal(parseInt(e.target.value) || 30)}
-              />
+      {/* ── Body ─────────────────────────────────────────────────────────── */}
+      <div style={{ maxWidth: 600, margin: '0 auto', padding: '36px 24px 80px' }}>
+
+        <h1 style={{
+          fontFamily: 'var(--font-lora)',
+          fontSize: 28, fontWeight: 700,
+          color: 'var(--rn-charcoal)',
+          margin: '0 0 28px',
+          letterSpacing: '-0.02em',
+        }}>
+          Innstillinger
+        </h1>
+
+        {/* ── Account info ─────────────────────────────────────────────── */}
+        <section style={{ marginBottom: 20 }}>
+          <h2 style={sectionHeading}>Konto</h2>
+          <div style={card}>
+            <Row icon={<Mail size={15} />} label="E-post" value={email} />
+            <Divider />
+            <Row
+              icon={<CalendarDays size={15} />}
+              label="Medlem siden"
+              value={memberSince}
+            />
+          </div>
+        </section>
+
+        {/* ── Security ─────────────────────────────────────────────────── */}
+        <section style={{ marginBottom: 20 }}>
+          <h2 style={sectionHeading}>Sikkerhet</h2>
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={iconWrap}><Shield size={15} style={{ color: 'var(--rn-charcoal-light)' }} /></div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--rn-charcoal)' }}>Passord</div>
+                  <div style={{ fontSize: 12, color: 'var(--rn-charcoal-muted)' }}>
+                    Tilbakestill via e-post
+                  </div>
+                </div>
+              </div>
+              {pwStep === 'sent' ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--rn-sage)', fontWeight: 500 }}>
+                  <Check size={14} />
+                  Sendt!
+                </div>
+              ) : (
+                <button
+                  onClick={handlePasswordReset}
+                  disabled={pwStep === 'sending'}
+                  style={{
+                    padding: '7px 16px',
+                    borderRadius: 9,
+                    border: '1.5px solid var(--rn-linen)',
+                    background: 'var(--rn-cream)',
+                    color: 'var(--rn-charcoal)',
+                    fontSize: 13, fontWeight: 500,
+                    cursor: pwStep === 'sending' ? 'default' : 'pointer',
+                    opacity: pwStep === 'sending' ? 0.6 : 1,
+                    fontFamily: 'var(--font-inter)',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {pwStep === 'sending' ? 'Sender…' : 'Send tilbakestillingslenke'}
+                </button>
+              )}
             </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Nye kort per dag</label>
-              <Input
-                type="number"
-                min={0}
-                max={100}
-                value={newCardsPerDay}
-                onChange={(e) => setNewCardsPerDay(parseInt(e.target.value) || 20)}
-              />
+            {pwError && (
+              <p style={{ fontSize: 12, color: 'var(--rn-overdue)', marginTop: 10, marginBottom: 0 }}>{pwError}</p>
+            )}
+          </div>
+        </section>
+
+        {/* ── Sign out ─────────────────────────────────────────────────── */}
+        <section style={{ marginBottom: 20 }}>
+          <h2 style={sectionHeading}>Økt</h2>
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={iconWrap}><User size={15} style={{ color: 'var(--rn-charcoal-light)' }} /></div>
+                <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--rn-charcoal)' }}>Logg ut av ReviNord</div>
+              </div>
+              <button
+                onClick={handleSignOut}
+                style={{
+                  padding: '7px 16px',
+                  borderRadius: 9,
+                  border: '1.5px solid var(--rn-linen)',
+                  background: 'var(--rn-cream)',
+                  color: 'var(--rn-charcoal)',
+                  fontSize: 13, fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-inter)',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                Logg ut
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-4">
-            <Button onClick={handleSaveSettings} disabled={saving} size="sm">
-              <Save className="w-4 h-4" />
-              {saving ? 'Lagrer...' : 'Lagre'}
-            </Button>
-            {saved && <span className="text-xs text-emerald-600 font-medium">Lagret!</span>}
-          </div>
-        </div>
+        </section>
 
-        {/* Import / Export */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Import og eksport</h2>
-          <div className="flex flex-wrap gap-2 mb-3">
-            <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
-              <Download className="w-4 h-4" /> Eksporter CSV
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleExport('json')}>
-              <Download className="w-4 h-4" /> Eksporter JSON
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-              <Upload className="w-4 h-4" /> Importer CSV
-            </Button>
-            <input ref={fileRef} type="file" accept=".csv" onChange={handleImport} className="hidden" />
+        {/* ── Danger zone ──────────────────────────────────────────────── */}
+        <section>
+          <h2 style={{ ...sectionHeading, color: 'var(--rn-overdue)' }}>Faresone</h2>
+          <div style={{ ...card, borderColor: '#D8B8B8' }}>
+            {!showDelete ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ ...iconWrap, background: 'var(--rn-overdue-bg)' }}>
+                    <Trash2 size={15} style={{ color: 'var(--rn-overdue)' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--rn-charcoal)' }}>Slett konto</div>
+                    <div style={{ fontSize: 12, color: 'var(--rn-charcoal-muted)' }}>
+                      Fjerner alle emner, revisjoner og kontoen din permanent.
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowDelete(true)}
+                  style={{
+                    padding: '7px 16px',
+                    borderRadius: 9,
+                    border: '1.5px solid #D8B8B8',
+                    background: 'var(--rn-overdue-bg)',
+                    color: 'var(--rn-overdue)',
+                    fontSize: 13, fontWeight: 500,
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-inter)',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  Slett konto
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 16 }}>
+                  <AlertTriangle size={16} style={{ color: 'var(--rn-overdue)', flexShrink: 0, marginTop: 2 }} />
+                  <p style={{ fontSize: 13, color: 'var(--rn-charcoal)', margin: 0, lineHeight: 1.5 }}>
+                    Dette sletter <strong>alle emner og revisjoner</strong> permanent og kan ikke angres.
+                    Skriv inn e-postadressen din for å bekrefte.
+                  </p>
+                </div>
+                <input
+                  type="email"
+                  placeholder={email}
+                  value={deleteConfirm}
+                  onChange={e => setDeleteConfirm(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    border: '1.5px solid #D8B8B8',
+                    background: 'var(--rn-cream-light)',
+                    color: 'var(--rn-charcoal)',
+                    fontSize: 14,
+                    outline: 'none',
+                    fontFamily: 'var(--font-inter)',
+                    boxSizing: 'border-box',
+                    marginBottom: 14,
+                  }}
+                />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => { setShowDelete(false); setDeleteConfirm(''); }}
+                    style={{
+                      flex: 1, padding: '9px 0',
+                      borderRadius: 9,
+                      border: '1.5px solid var(--rn-linen)',
+                      background: 'white',
+                      color: 'var(--rn-charcoal)',
+                      fontSize: 13, fontWeight: 500,
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font-inter)',
+                    }}
+                  >
+                    Avbryt
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirm !== email || deleting}
+                    style={{
+                      flex: 1, padding: '9px 0',
+                      borderRadius: 9,
+                      border: 'none',
+                      background: deleteConfirm === email && !deleting ? 'var(--rn-overdue)' : 'var(--rn-linen)',
+                      color: deleteConfirm === email && !deleting ? 'white' : 'var(--rn-charcoal-muted)',
+                      fontSize: 13, fontWeight: 600,
+                      cursor: deleteConfirm === email && !deleting ? 'pointer' : 'default',
+                      fontFamily: 'var(--font-inter)',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {deleting ? 'Sletter…' : 'Bekreft sletting'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          {importStatus && (
-            <p className={`text-xs ${importStatus.startsWith('Error') ? 'text-red-500' : 'text-emerald-600'}`}>{importStatus}</p>
-          )}
-          <p className="text-xs text-slate-400 mt-2">
-            CSV-format: front, back, type (valgfritt), cloze_text (valgfritt), tags (valgfritt, kommaseparert)
-          </p>
-        </div>
-
-        {/* Danger zone */}
-        <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-5">
-          <h2 className="text-sm font-semibold text-red-600 mb-2">Faresone</h2>
-          <p className="text-xs text-slate-500 mb-4">
-            Slett kontoen din og all tilhørende data. Denne handlingen er permanent og kan ikke angres.
-          </p>
-          {!showDelete ? (
-            <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDelete(true)}>
-              <Trash2 className="w-4 h-4" /> Slett alle mine data
-            </Button>
-          ) : (
-            <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
-              <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
-              <p className="text-xs text-red-700 flex-1">Er du sikker? Alle kortstokker, kort og repetisjonshistorikk slettes permanent.</p>
-              <Button size="sm" variant="outline" onClick={() => setShowDelete(false)}>Avbryt</Button>
-              <Button size="sm" className="bg-red-600 hover:bg-red-700" onClick={handleDeleteAccount} disabled={deleting}>
-                {deleting ? 'Sletter...' : 'Bekreft sletting'}
-              </Button>
-            </div>
-          )}
-        </div>
-      </main>
+        </section>
+      </div>
     </div>
   );
+}
+
+// ── Shared micro-styles ────────────────────────────────────────────────────
+
+const sectionHeading: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.07em',
+  color: 'var(--rn-charcoal-muted)',
+  margin: '0 0 8px',
+};
+
+const card: React.CSSProperties = {
+  background: 'white',
+  border: '1.5px solid var(--rn-linen)',
+  borderRadius: 16,
+  padding: '18px 20px',
+  boxShadow: 'var(--rn-shadow-xs)',
+};
+
+const iconWrap: React.CSSProperties = {
+  width: 32, height: 32,
+  borderRadius: 9,
+  background: 'var(--rn-cream-dark)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  flexShrink: 0,
+};
+
+function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={iconWrap}>{icon && <span style={{ color: 'var(--rn-charcoal-light)' }}>{icon}</span>}</div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 11, color: 'var(--rn-charcoal-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          {label}
+        </div>
+        <div style={{ fontSize: 14, color: 'var(--rn-charcoal)', fontWeight: 500 }}>{value}</div>
+      </div>
+    </div>
+  );
+}
+
+function Divider() {
+  return <div style={{ height: 1, background: 'var(--rn-linen)', margin: '14px 0' }} />;
 }
