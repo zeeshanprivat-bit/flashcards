@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Plus, Trash2, CheckCircle2, Clock, AlertTriangle, Circle,
-  ChevronRight, BookOpen, RefreshCw, LogOut, Settings
+  ChevronRight, BookOpen, RefreshCw, LogOut, Settings, CalendarDays
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { STATUS_META, getDueLabel, getLastRevisedLabel } from '@/lib/revision';
@@ -353,6 +353,23 @@ export default function DashboardClient({
           )}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          <Link
+            href="/kalender"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '7px 14px',
+              borderRadius: 9,
+              border: '1.5px solid var(--rn-linen)',
+              background: 'white',
+              color: 'var(--rn-charcoal-light)',
+              fontSize: 13, fontWeight: 500,
+              textDecoration: 'none',
+            }}
+            title="Kalender"
+          >
+            <CalendarDays size={14} />
+            Kalender
+          </Link>
           <Link
             href="/settings"
             style={{
