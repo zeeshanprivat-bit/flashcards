@@ -33,8 +33,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Redirect authenticated users away from landing page
-  if (user && pathname === '/') {
+  // Redirect authenticated users away from landing/login pages
+  if (user && (pathname === '/' || pathname === '/login')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 

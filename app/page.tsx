@@ -154,10 +154,10 @@ function Nav() {
           Slik fungerer det
         </a>
         <div style={{ display: "flex", gap: 8 }}>
-          <Link href="/dashboard" className="rn-btn-ghost" style={{ padding: "8px 16px", fontSize: 14 }}>
+          <Link href="/login" className="rn-btn-ghost" style={{ padding: "8px 16px", fontSize: 14 }}>
             Logg inn
           </Link>
-          <Link href="/dashboard" className="rn-btn-primary" style={{ padding: "8px 16px", fontSize: 14 }}>
+          <Link href="/login" className="rn-btn-primary" style={{ padding: "8px 16px", fontSize: 14 }}>
             Start gratis
           </Link>
         </div>
@@ -515,7 +515,7 @@ function HeroSection() {
               animationDelay: "0.18s",
             }}
           >
-            <Link href="/dashboard" className="rn-btn-primary">
+            <Link href="/login" className="rn-btn-primary">
               Start gratis
               <ArrowRight size={16} />
             </Link>
@@ -1299,7 +1299,7 @@ function FreeSection() {
           </ul>
 
           <Link
-            href="/dashboard"
+            href="/login"
             style={{
               display: "flex",
               alignItems: "center",
@@ -1386,7 +1386,7 @@ function CTASection() {
           holde revisjonen på sporet—stille, konsekvent og uten støy.
         </p>
 
-        <Link href="/dashboard" className="rn-btn-primary" style={{ fontSize: 16, padding: "15px 36px" }}>
+        <Link href="/login" className="rn-btn-primary" style={{ fontSize: 16, padding: "15px 36px" }}>
           Start gratis i dag
           <ArrowRight size={18} />
         </Link>
