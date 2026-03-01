@@ -28,13 +28,8 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Redirect unauthenticated users away from protected routes
-  if (!user && pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-  if (!user && pathname.startsWith('/decks')) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-  if (!user && pathname.startsWith('/study')) {
+  const protectedPrefixes = ['/dashboard', '/topics', '/decks', '/study', '/chat', '/mnemonics', '/stats', '/settings'];
+  if (!user && protectedPrefixes.some(p => pathname.startsWith(p))) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 

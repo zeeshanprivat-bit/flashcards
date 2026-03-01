@@ -16,11 +16,11 @@ interface TopicEntry {
 }
 
 const INITIAL_TOPICS: TopicEntry[] = [
-  { id: 1, name: "Cardiology", daysAgo: 12, status: "due-soon", dueIn: 2 },
-  { id: 2, name: "Pharmacology", daysAgo: 3, status: "on-track", dueIn: 4 },
+  { id: 1, name: "Kardiologi", daysAgo: 12, status: "due-soon", dueIn: 2 },
+  { id: 2, name: "Farmakologi", daysAgo: 3, status: "on-track", dueIn: 4 },
   {
     id: 3,
-    name: "Anatomy & Physiology",
+    name: "Anatomi og fysiologi",
     daysAgo: 22,
     status: "overdue",
     dueIn: null,
@@ -30,40 +30,40 @@ const INITIAL_TOPICS: TopicEntry[] = [
 
 const STATUS_CONFIG = {
   fresh: {
-    label: "Fresh",
+    label: "Fersk",
     color: "#7B9E7B",
     bg: "#E8F0E8",
     border: "#C8DFC8",
     icon: CheckCircle2,
     getDueText: (entry: TopicEntry) =>
-      `Due in ${entry.dueIn} day${entry.dueIn === 1 ? "" : "s"}`,
+      `Om ${entry.dueIn} dag${entry.dueIn === 1 ? "" : "er"}`,
   },
   "on-track": {
-    label: "On track",
+    label: "På sporet",
     color: "#5B7FA6",
     bg: "#E3ECF4",
     border: "#BFCFDF",
     icon: CheckCircle2,
     getDueText: (entry: TopicEntry) =>
-      `Due in ${entry.dueIn} day${entry.dueIn === 1 ? "" : "s"}`,
+      `Om ${entry.dueIn} dag${entry.dueIn === 1 ? "" : "er"}`,
   },
   "due-soon": {
-    label: "Due soon",
+    label: "Forfaller snart",
     color: "#C4735A",
     bg: "#F0E4DF",
     border: "#DEC4B8",
     icon: Clock,
     getDueText: (entry: TopicEntry) =>
-      `Due in ${entry.dueIn} day${entry.dueIn === 1 ? "" : "s"}`,
+      `Om ${entry.dueIn} dag${entry.dueIn === 1 ? "" : "er"}`,
   },
   overdue: {
-    label: "Overdue",
+    label: "Forfalt",
     color: "#B85252",
     bg: "#F4E3E3",
     border: "#D8B8B8",
     icon: AlertTriangle,
     getDueText: (entry: TopicEntry) =>
-      `${entry.daysLate} day${entry.daysLate === 1 ? "" : "s"} late`,
+      `${entry.daysLate} dag${entry.daysLate === 1 ? "" : "er"} forsinket`,
   },
 };
 
@@ -232,7 +232,7 @@ export default function DemoWidget() {
             fontFamily: "var(--font-inter)",
           }}
         >
-          ReviNord — My Topics
+          ReviNord — Mine emner
         </span>
       </div>
 
@@ -256,7 +256,7 @@ export default function DemoWidget() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleLog()}
-            placeholder="Add a topic, e.g. Cardiac Pharmacology"
+            placeholder="Legg til et emne, f.eks. Kardiologisk farmakologi"
             style={{
               width: "100%",
               padding: "10px 14px 10px 34px",
@@ -300,7 +300,7 @@ export default function DemoWidget() {
             gap: 6,
           }}
         >
-          Log revision
+          Logg revisjon
           {inputValue.trim() && <ArrowRight size={14} />}
         </button>
       </div>
@@ -366,8 +366,8 @@ export default function DemoWidget() {
                   }}
                 >
                   {topic.daysAgo === 0
-                    ? "Just revised"
-                    : `Revised ${topic.daysAgo} day${topic.daysAgo === 1 ? "" : "s"} ago`}
+                    ? "Nettopp repetert"
+                    : `Repetert for ${topic.daysAgo} dag${topic.daysAgo === 1 ? "" : "er"} siden`}
                 </div>
                 <TimelineDots filled={timeline} />
               </div>
@@ -412,7 +412,7 @@ export default function DemoWidget() {
                     (e.currentTarget.style.color = "var(--rn-charcoal-muted)")
                   }
                 >
-                  remove
+                  fjern
                 </button>
               </div>
             </div>
@@ -430,7 +430,7 @@ export default function DemoWidget() {
             fontFamily: "var(--font-inter)",
           }}
         >
-          No topics yet. Add one above ↑
+          Ingen emner ennå. Legg til et ovenfor ↑
         </div>
       )}
     </div>

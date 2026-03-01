@@ -142,7 +142,7 @@ function Nav() {
         }}
       >
         <a
-          href="#how-it-works"
+          href="#slik-fungerer-det"
           style={{
             fontSize: 14,
             color: "var(--rn-charcoal-light)",
@@ -151,26 +151,14 @@ function Nav() {
             transition: "color 0.15s",
           }}
         >
-          How it works
-        </a>
-        <a
-          href="#pricing"
-          style={{
-            fontSize: 14,
-            color: "var(--rn-charcoal-light)",
-            textDecoration: "none",
-            fontFamily: "var(--font-inter)",
-            transition: "color 0.15s",
-          }}
-        >
-          Pricing
+          Slik fungerer det
         </a>
         <div style={{ display: "flex", gap: 8 }}>
           <Link href="/dashboard" className="rn-btn-ghost" style={{ padding: "8px 16px", fontSize: 14 }}>
-            Sign in
+            Logg inn
           </Link>
           <Link href="/dashboard" className="rn-btn-primary" style={{ padding: "8px 16px", fontSize: 14 }}>
-            Start free
+            Start gratis
           </Link>
         </div>
       </div>
@@ -182,10 +170,10 @@ function Nav() {
 
 const MOCK_CARDS = [
   {
-    subject: "Cardiology",
+    subject: "Kardiologi",
     emoji: "🫀",
     daysAgo: 12,
-    status: "Due in 2 days",
+    status: "Om 2 dager",
     statusColor: "#C4735A",
     statusBg: "#F0E4DF",
     ringPct: 0.85,
@@ -198,10 +186,10 @@ const MOCK_CARDS = [
     opacity: 1,
   },
   {
-    subject: "Pharmacology",
+    subject: "Farmakologi",
     emoji: "💊",
     daysAgo: 3,
-    status: "On track",
+    status: "På sporet",
     statusColor: "#5B7FA6",
     statusBg: "#E3ECF4",
     ringPct: 0.45,
@@ -214,10 +202,10 @@ const MOCK_CARDS = [
     opacity: 0.88,
   },
   {
-    subject: "Anatomy",
+    subject: "Anatomi",
     emoji: "🦴",
     daysAgo: 22,
-    status: "Overdue",
+    status: "Forfalt",
     statusColor: "#B85252",
     statusBg: "#F4E3E3",
     ringPct: 1.0,
@@ -292,7 +280,7 @@ function HeroMockCards() {
                   color: "var(--rn-charcoal-light)",
                 }}
               >
-                Revised {card.daysAgo} days ago
+                Repetert for {card.daysAgo} dager siden
               </div>
             </div>
           </div>
@@ -362,7 +350,7 @@ function HeroMockCards() {
                   color: "var(--rn-charcoal)",
                 }}
               >
-                Cardiology
+                Kardiologi
               </span>
             </div>
             <div
@@ -372,7 +360,7 @@ function HeroMockCards() {
                 color: "var(--rn-charcoal-light)",
               }}
             >
-              Revised 12 days ago
+              Repetert for 12 dager siden
             </div>
           </div>
         </div>
@@ -391,7 +379,7 @@ function HeroMockCards() {
             style={{ background: "#F0E4DF", color: "#C4735A" }}
           >
             <Clock size={11} />
-            Due in 2 days
+            Om 2 dager
           </span>
           <TimelineDots filled={[true, false, true, true, false, true, true]} />
         </div>
@@ -430,7 +418,7 @@ function HeroMockCards() {
               fontFamily: "var(--font-inter)",
             }}
           >
-            Last revised
+            Sist repetert
           </span>
           <span
             style={{
@@ -440,7 +428,7 @@ function HeroMockCards() {
               fontWeight: 500,
             }}
           >
-            Due in 2 days →
+            Om 2 dager →
           </span>
         </div>
       </div>
@@ -475,7 +463,7 @@ function HeroSection() {
             style={{ marginBottom: 24, animationDelay: "0s" }}
           >
             <Sparkles size={12} />
-            For medical students
+            For medisinstudenter
           </div>
 
           {/* H1 */}
@@ -491,12 +479,12 @@ function HeroSection() {
               animationDelay: "0.06s",
             }}
           >
-            Your revision,
+            Din revisjon,
             <br />
             <em style={{ fontStyle: "italic", color: "var(--rn-terracotta)" }}>
-              finally
+              endelig
             </em>{" "}
-            at peace.
+            i ro.
           </h1>
 
           {/* Subtext */}
@@ -511,9 +499,9 @@ function HeroSection() {
               animationDelay: "0.12s",
             }}
           >
-            Track every topic you study. Log when you revise. ReviNord
-            calculates your optimal return window using spaced repetition—so
-            nothing slips through the cracks before your exams.
+            Spor hvert emne du studerer. Logg når du repeterer. ReviNord
+            beregner ditt optimale returvindu med spredd repetisjon—så ingenting
+            faller gjennom sprekkene før eksamen.
           </p>
 
           {/* CTAs */}
@@ -528,11 +516,11 @@ function HeroSection() {
             }}
           >
             <Link href="/dashboard" className="rn-btn-primary">
-              Start for free
+              Start gratis
               <ArrowRight size={16} />
             </Link>
-            <a href="#how-it-works" className="rn-btn-ghost">
-              See how it works
+            <a href="#slik-fungerer-det" className="rn-btn-ghost">
+              Se hvordan det fungerer
             </a>
           </div>
 
@@ -548,9 +536,9 @@ function HeroSection() {
             }}
           >
             {[
-              "Free forever",
-              "No credit card",
-              "Private by default",
+              "Gratis for alltid",
+              "Ingen kredittkort",
+              "Privat som standard",
             ].map((t) => (
               <div
                 key={t}
@@ -639,9 +627,9 @@ function DemoSection() {
               marginBottom: 16,
             }}
           >
-            Type a topic. Log a revision.
+            Skriv et emne. Logg en revisjon.
             <br />
-            Watch the magic happen.
+            Se magien skje.
           </h2>
           <p
             className="rn-sans"
@@ -653,8 +641,8 @@ function DemoSection() {
               margin: "0 auto",
             }}
           >
-            This is exactly what the app feels like. Try adding a topic you're
-            currently studying.
+            Dette er nøyaktig slik appen føles. Prøv å legge til et emne du
+            studerer for øyeblikket.
           </p>
         </div>
 
@@ -673,29 +661,29 @@ function HowItWorksSection() {
       icon: Layers,
       color: "var(--rn-fjord)",
       bg: "var(--rn-fjord-bg)",
-      title: "Add a topic",
-      body: "Type any subject you're studying—Cardiology, Pharmacology, Anatomy. Each topic lives in its own quiet space on your timeline.",
+      title: "Legg til et emne",
+      body: "Skriv inn et fag du studerer—Kardiologi, Farmakologi, Anatomi. Hvert emne lever i sitt eget rolige rom på tidslinjen din.",
     },
     {
       n: "02",
       icon: CheckCircle2,
       color: "var(--rn-sage)",
       bg: "var(--rn-sage-bg)",
-      title: "Log a revision",
-      body: "Studied it today? Mark it revised. ReviNord records the date and begins calculating your ideal next-review window using SM-2 spaced repetition.",
+      title: "Logg en revisjon",
+      body: "Studerte du det i dag? Merk det som repetert. ReviNord registrerer datoen og begynner å beregne ditt ideelle neste gjennomgangsvindu med SM-2 spredd repetisjon.",
     },
     {
       n: "03",
       icon: CalendarDays,
       color: "var(--rn-terracotta)",
       bg: "var(--rn-terracotta-bg)",
-      title: "Return at the right time",
-      body: "See each topic's status at a glance: Fresh, On track, Due soon, Overdue. You always know what needs attention today—and what can wait.",
+      title: "Kom tilbake til rett tid",
+      body: "Se hvert emnes status med et blikk: Fersk, På sporet, Forfaller snart, Forfalt. Du vet alltid hva som trenger oppmerksomhet i dag—og hva som kan vente.",
     },
   ];
 
   return (
-    <section id="how-it-works" className="rn-section">
+    <section id="slik-fungerer-det" className="rn-section">
       <div style={{ maxWidth: 1080, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 64 }}>
           <div
@@ -703,7 +691,7 @@ function HowItWorksSection() {
             style={{ justifyContent: "center", marginBottom: 16 }}
           >
             <RefreshCw size={12} />
-            How it works
+            Slik fungerer det
           </div>
           <h2
             className="rn-serif"
@@ -715,10 +703,10 @@ function HowItWorksSection() {
               lineHeight: 1.18,
             }}
           >
-            Three steps.
+            Tre steg.
             <br />
             <em style={{ color: "var(--rn-charcoal-light)", fontWeight: 400 }}>
-              That&apos;s all it takes.
+              Det er alt som trengs.
             </em>
           </h2>
         </div>
@@ -833,18 +821,18 @@ function HowItWorksSection() {
 
 function FeaturesSection() {
   const chips = [
-    { label: "Add topics", color: "var(--rn-fjord)", bg: "var(--rn-fjord-bg)" },
-    { label: "Delete & edit", color: "var(--rn-fjord)", bg: "var(--rn-fjord-bg)" },
-    { label: "Revision timeline", color: "var(--rn-sage)", bg: "var(--rn-sage-bg)" },
-    { label: "Due dates", color: "var(--rn-sage)", bg: "var(--rn-sage-bg)" },
-    { label: "Status labels", color: "var(--rn-terracotta)", bg: "var(--rn-terracotta-bg)" },
-    { label: "Spaced repetition", color: "var(--rn-terracotta)", bg: "var(--rn-terracotta-bg)" },
-    { label: "Cross-device sync", color: "var(--rn-fjord)", bg: "var(--rn-fjord-bg)" },
-    { label: "Private & secure", color: "var(--rn-sage)", bg: "var(--rn-sage-bg)" },
-    { label: "CSV export", color: "var(--rn-charcoal-light)", bg: "var(--rn-cream-dark)" },
-    { label: "Study streaks ✦", color: "var(--rn-terracotta)", bg: "var(--rn-terracotta-bg)", soon: true },
-    { label: "Team sharing ✦", color: "var(--rn-charcoal-light)", bg: "var(--rn-cream-dark)", soon: true },
-    { label: "Magic link auth", color: "var(--rn-fjord)", bg: "var(--rn-fjord-bg)" },
+    { label: "Legg til emner", color: "var(--rn-fjord)", bg: "var(--rn-fjord-bg)" },
+    { label: "Slett og rediger", color: "var(--rn-fjord)", bg: "var(--rn-fjord-bg)" },
+    { label: "Revisjonstidslinje", color: "var(--rn-sage)", bg: "var(--rn-sage-bg)" },
+    { label: "Forfallsdatoer", color: "var(--rn-sage)", bg: "var(--rn-sage-bg)" },
+    { label: "Statusetiketter", color: "var(--rn-terracotta)", bg: "var(--rn-terracotta-bg)" },
+    { label: "Spredd repetisjon", color: "var(--rn-terracotta)", bg: "var(--rn-terracotta-bg)" },
+    { label: "Synkronisert på alle enheter", color: "var(--rn-fjord)", bg: "var(--rn-fjord-bg)" },
+    { label: "Privat og sikker", color: "var(--rn-sage)", bg: "var(--rn-sage-bg)" },
+    { label: "Magic link-innlogging", color: "var(--rn-fjord)", bg: "var(--rn-fjord-bg)" },
+    { label: "Studiestreaks ✦", color: "var(--rn-terracotta)", bg: "var(--rn-terracotta-bg)", soon: true },
+    { label: "CSV-eksport ✦", color: "var(--rn-charcoal-light)", bg: "var(--rn-cream-dark)", soon: true },
+    { label: "Team-deling ✦", color: "var(--rn-charcoal-light)", bg: "var(--rn-cream-dark)", soon: true },
   ];
 
   return (
@@ -860,7 +848,7 @@ function FeaturesSection() {
           style={{ justifyContent: "center", marginBottom: 16 }}
         >
           <Layers size={12} />
-          Everything included
+          Alt inkludert
         </div>
         <h2
           className="rn-serif"
@@ -872,7 +860,7 @@ function FeaturesSection() {
             marginBottom: 16,
           }}
         >
-          Designed for how medical students actually study.
+          Laget for hvordan medisinstudenter faktisk studerer.
         </h2>
         <p
           className="rn-sans"
@@ -885,8 +873,8 @@ function FeaturesSection() {
             margin: "0 auto 48px",
           }}
         >
-          No bloat. No AI gimmicks. Just a calm, focused tool for tracking
-          what matters.
+          Ingen bloat. Ingen AI-triks. Bare et rolig, fokusert verktøy for å
+          spore det som betyr noe.
         </p>
 
         <div
@@ -930,7 +918,7 @@ function FeaturesSection() {
                     marginLeft: 2,
                   }}
                 >
-                  soon
+                  snart
                 </span>
               )}
             </div>
@@ -962,7 +950,7 @@ function TrustSection() {
               style={{ marginBottom: 20 }}
             >
               <Shield size={12} />
-              Built to protect
+              Bygget for å beskytte
             </div>
             <h2
               className="rn-serif"
@@ -975,9 +963,9 @@ function TrustSection() {
                 marginBottom: 20,
               }}
             >
-              Your study data
+              Studiedataene dine
               <br />
-              <em style={{ color: "var(--rn-fjord)" }}>stays yours.</em>
+              <em style={{ color: "var(--rn-fjord)" }}>forblir dine.</em>
             </h2>
             <p
               className="rn-sans"
@@ -988,10 +976,10 @@ function TrustSection() {
                 marginBottom: 36,
               }}
             >
-              ReviNord is built on Supabase—a battle-tested open-source
-              infrastructure trusted by hundreds of thousands of developers.
-              Every row you create is protected by row-level security policies
-              that ensure only you can access your data.
+              ReviNord er bygget på Supabase—en kamptestet åpen kildekode-
+              infrastruktur som er betrodd av hundretusenvis av utviklere.
+              Hver rad du oppretter er beskyttet av radnivåsikkerhetspolicyer
+              som sikrer at bare du kan få tilgang til dataene dine.
             </p>
 
             {/* Supabase badge */}
@@ -1029,7 +1017,7 @@ function TrustSection() {
                     color: "var(--rn-charcoal)",
                   }}
                 >
-                  Built on Supabase
+                  Bygget på Supabase
                 </div>
                 <div
                   className="rn-sans"
@@ -1038,7 +1026,7 @@ function TrustSection() {
                     color: "var(--rn-charcoal-muted)",
                   }}
                 >
-                  Open-source · Row-level security · Encrypted
+                  Åpen kildekode · Radnivåsikkerhet · Kryptert
                 </div>
               </div>
             </div>
@@ -1051,22 +1039,22 @@ function TrustSection() {
                 icon: Lock,
                 color: "var(--rn-terracotta)",
                 bg: "var(--rn-terracotta-bg)",
-                title: "Row-level security",
-                body: "PostgreSQL-enforced policies mean only you can read or write your topics—not even our team can see them.",
+                title: "Radnivåsikkerhet",
+                body: "PostgreSQL-håndhevede policyer betyr at bare du kan lese eller skrive emnene dine—ikke engang teamet vårt kan se dem.",
               },
               {
                 icon: Wifi,
                 color: "var(--rn-fjord)",
                 bg: "var(--rn-fjord-bg)",
-                title: "Synced across devices",
-                body: "Study on your laptop, check status on your phone. Your revision history follows you everywhere, instantly.",
+                title: "Synkronisert på alle enheter",
+                body: "Studer på laptopen, sjekk status på telefonen. Revisjonshistorikken din følger deg overalt, umiddelbart.",
               },
               {
                 icon: Shield,
                 color: "var(--rn-sage)",
                 bg: "var(--rn-sage-bg)",
-                title: "Encrypted at rest",
-                body: "All data is stored encrypted. Your medical study notes, revision dates, and history are never exposed.",
+                title: "Kryptert i ro",
+                body: "All data lagres kryptert. Medisinstudienotatene dine, revisjonsdatoer og historikk er aldri eksponert.",
               },
             ].map((p) => (
               <div
@@ -1137,9 +1125,9 @@ function TrustSection() {
           }}
         >
           {[
-            { n: "3,200+", label: "Students tracking revisions" },
-            { n: "180k+", label: "Revisions logged" },
-            { n: "94%", label: "Study more consistently" },
+            { n: "3 200+", label: "Studenter som sporer revisjoner" },
+            { n: "180k+", label: "Revisjoner logget" },
+            { n: "94 %", label: "Studerer mer konsekvent" },
           ].map((s) => (
             <div
               key={s.label}
@@ -1179,295 +1167,161 @@ function TrustSection() {
   );
 }
 
-/* ─── Pricing ─────────────────────────────────────────────────────────────── */
+/* ─── Free forever Section ────────────────────────────────────────────────── */
 
-function PricingSection() {
-  const plans = [
-    {
-      name: "Free",
-      price: "€0",
-      per: "forever",
-      tagline: "Get started quietly.",
-      features: [
-        "Up to 10 topics",
-        "Full revision history",
-        "Status labels & due dates",
-        "1 device",
-        "Email magic link auth",
-      ],
-      cta: "Start for free",
-      highlight: false,
-    },
-    {
-      name: "Nord",
-      price: "€4",
-      per: "/ month",
-      annual: "€39 billed yearly",
-      tagline: "For the serious student.",
-      features: [
-        "Unlimited topics",
-        "Study streaks",
-        "CSV export",
-        "Up to 3 devices",
-        "1-year history",
-        "Priority email support",
-      ],
-      cta: "Start Nord",
-      highlight: true,
-    },
-    {
-      name: "Pro",
-      price: "€9",
-      per: "/ month",
-      annual: "€85 billed yearly",
-      tagline: "For study groups & teams.",
-      features: [
-        "Everything in Nord",
-        "Team mode (5 members)",
-        "Shared topic libraries",
-        "Analytics dashboard",
-        "API access",
-        "Priority support",
-      ],
-      cta: "Start Pro",
-      highlight: false,
-    },
+function FreeSection() {
+  const features = [
+    "Ubegrenset antall emner",
+    "Full revisjonshistorikk",
+    "Spredd repetisjon (SM-2)",
+    "Synkronisert på alle enheter",
+    "Alltid privat og kryptert",
+    "Magic link-innlogging",
   ];
 
   return (
     <section
-      id="pricing"
       style={{ background: "var(--rn-cream-dark)", padding: "96px 32px" }}
     >
-      <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 60 }}>
-          <div
-            className="rn-eyebrow"
-            style={{ justifyContent: "center", marginBottom: 16 }}
-          >
-            <Sparkles size={12} />
-            Pricing
-          </div>
-          <h2
-            className="rn-serif"
-            style={{
-              fontSize: "clamp(28px, 4vw, 44px)",
-              fontWeight: 500,
-              color: "var(--rn-charcoal)",
-              letterSpacing: "-0.025em",
-              marginBottom: 12,
-            }}
-          >
-            Honest, calm pricing.
-          </h2>
-          <p
-            className="rn-sans"
-            style={{
-              fontSize: 16,
-              color: "var(--rn-charcoal-light)",
-            }}
-          >
-            No dark patterns. No surprise upgrades. Upgrade only when you need more.
-          </p>
+      <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
+        <div
+          className="rn-eyebrow"
+          style={{ justifyContent: "center", marginBottom: 16 }}
+        >
+          <Sparkles size={12} />
+          Priser
         </div>
+        <h2
+          className="rn-serif"
+          style={{
+            fontSize: "clamp(28px, 4vw, 44px)",
+            fontWeight: 500,
+            color: "var(--rn-charcoal)",
+            letterSpacing: "-0.025em",
+            marginBottom: 12,
+          }}
+        >
+          Gratis, og det forblir slik.
+        </h2>
+        <p
+          className="rn-sans"
+          style={{
+            fontSize: 16,
+            color: "var(--rn-charcoal-light)",
+            lineHeight: 1.65,
+            marginBottom: 52,
+            maxWidth: 460,
+            margin: "0 auto 52px",
+          }}
+        >
+          ReviNord er gratis for alle. Ingen prøveperiode, ingen betalingsplan,
+          ingen kredittkort. Bare et stille, fokusert verktøy—for alltid.
+        </p>
 
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 20,
-            alignItems: "start",
+            background: "var(--rn-cream-light)",
+            border: "1.5px solid var(--rn-linen)",
+            borderRadius: 24,
+            padding: "44px 48px",
+            boxShadow: "var(--rn-shadow-lg)",
+            display: "inline-block",
+            width: "100%",
+            maxWidth: 480,
+            boxSizing: "border-box",
           }}
         >
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
+          <div style={{ marginBottom: 8 }}>
+            <span
+              className="rn-serif"
               style={{
-                background: plan.highlight
-                  ? "var(--rn-charcoal)"
-                  : "var(--rn-cream-light)",
-                border: plan.highlight
-                  ? "1.5px solid var(--rn-charcoal)"
-                  : "1.5px solid var(--rn-linen)",
-                borderRadius: 20,
-                padding: 36,
-                boxShadow: plan.highlight
-                  ? "var(--rn-shadow-xl)"
-                  : "var(--rn-shadow-sm)",
-                position: "relative",
+                fontSize: 56,
+                fontWeight: 600,
+                color: "var(--rn-charcoal)",
+                letterSpacing: "-0.04em",
+                lineHeight: 1,
               }}
             >
-              {plan.highlight && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: -12,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    background: "var(--rn-terracotta)",
-                    color: "white",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    letterSpacing: "0.06em",
-                    padding: "4px 14px",
-                    borderRadius: 20,
-                    fontFamily: "var(--font-inter)",
-                    textTransform: "uppercase",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Most popular
-                </div>
-              )}
+              kr 0
+            </span>
+            <span
+              className="rn-sans"
+              style={{
+                fontSize: 16,
+                color: "var(--rn-charcoal-muted)",
+                marginLeft: 8,
+              }}
+            >
+              for alltid
+            </span>
+          </div>
 
-              <div
-                className="rn-sans"
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: plan.highlight
-                    ? "rgba(255,255,255,0.5)"
-                    : "var(--rn-charcoal-muted)",
-                  marginBottom: 12,
-                }}
-              >
-                {plan.name}
-              </div>
+          <hr
+            style={{
+              border: "none",
+              height: 1,
+              background: "var(--rn-linen)",
+              margin: "28px 0",
+            }}
+          />
 
-              <div style={{ marginBottom: 8 }}>
-                <span
-                  className="rn-serif"
-                  style={{
-                    fontSize: 44,
-                    fontWeight: 600,
-                    color: plan.highlight ? "white" : "var(--rn-charcoal)",
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1,
-                  }}
-                >
-                  {plan.price}
-                </span>
-                <span
-                  className="rn-sans"
-                  style={{
-                    fontSize: 14,
-                    color: plan.highlight
-                      ? "rgba(255,255,255,0.5)"
-                      : "var(--rn-charcoal-muted)",
-                    marginLeft: 4,
-                  }}
-                >
-                  {plan.per}
-                </span>
-              </div>
-
-              {plan.annual && (
-                <div
-                  className="rn-sans"
-                  style={{
-                    fontSize: 12,
-                    color: plan.highlight
-                      ? "rgba(255,255,255,0.4)"
-                      : "var(--rn-charcoal-muted)",
-                    marginBottom: 6,
-                  }}
-                >
-                  {plan.annual}
-                </div>
-              )}
-
-              <div
-                className="rn-sans"
-                style={{
-                  fontSize: 14,
-                  color: plan.highlight
-                    ? "rgba(255,255,255,0.65)"
-                    : "var(--rn-charcoal-light)",
-                  marginBottom: 28,
-                  marginTop: 4,
-                }}
-              >
-                {plan.tagline}
-              </div>
-
-              <hr
-                style={{
-                  border: "none",
-                  height: 1,
-                  background: plan.highlight
-                    ? "rgba(255,255,255,0.1)"
-                    : "var(--rn-linen)",
-                  marginBottom: 24,
-                }}
-              />
-
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: 0,
-                  margin: "0 0 28px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 11,
-                }}
-              >
-                {plan.features.map((f) => (
-                  <li
-                    key={f}
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 9,
-                      fontSize: 14,
-                      color: plan.highlight ? "rgba(255,255,255,0.8)" : "var(--rn-charcoal-mid)",
-                      fontFamily: "var(--font-inter)",
-                    }}
-                  >
-                    <CheckCircle2
-                      size={15}
-                      color={plan.highlight ? "#7B9E7B" : "var(--rn-sage)"}
-                      style={{ flexShrink: 0, marginTop: 1 }}
-                    />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/dashboard"
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: "0 0 36px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 13,
+              textAlign: "left",
+            }}
+          >
+            {features.map((f) => (
+              <li
+                key={f}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  width: "100%",
-                  padding: "13px 0",
-                  borderRadius: 12,
-                  background: plan.highlight
-                    ? "var(--rn-terracotta)"
-                    : "transparent",
-                  border: plan.highlight
-                    ? "none"
-                    : "1.5px solid var(--rn-linen)",
-                  color: plan.highlight ? "white" : "var(--rn-charcoal-mid)",
+                  gap: 10,
                   fontSize: 15,
-                  fontWeight: 500,
+                  color: "var(--rn-charcoal-mid)",
                   fontFamily: "var(--font-inter)",
-                  textDecoration: "none",
-                  transition: "all 0.18s ease",
-                  boxShadow: plan.highlight
-                    ? "0 2px 8px rgba(196,115,90,0.3)"
-                    : "none",
-                  boxSizing: "border-box",
                 }}
               >
-                {plan.cta}
-                <ArrowRight size={15} />
-              </Link>
-            </div>
-          ))}
+                <CheckCircle2
+                  size={16}
+                  color="var(--rn-sage)"
+                  style={{ flexShrink: 0 }}
+                />
+                {f}
+              </li>
+            ))}
+          </ul>
+
+          <Link
+            href="/dashboard"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              width: "100%",
+              padding: "14px 0",
+              borderRadius: 13,
+              background: "var(--rn-terracotta)",
+              color: "white",
+              fontSize: 16,
+              fontWeight: 600,
+              fontFamily: "var(--font-inter)",
+              textDecoration: "none",
+              boxShadow: "0 2px 12px rgba(196,115,90,0.28)",
+              transition: "all 0.18s ease",
+              boxSizing: "border-box",
+            }}
+          >
+            Kom i gang nå
+            <ArrowRight size={16} />
+          </Link>
         </div>
       </div>
     </section>
@@ -1512,9 +1366,9 @@ function CTASection() {
             marginBottom: 20,
           }}
         >
-          Ready to study
+          Klar til å studere
           <br />
-          with clarity?
+          med klarhet?
         </h2>
 
         <p
@@ -1528,12 +1382,12 @@ function CTASection() {
             margin: "0 auto 40px",
           }}
         >
-          Join thousands of medical students who trust ReviNord to keep their
-          revision on track—quietly, consistently, and without the noise.
+          Bli med tusenvis av medisinstudenter som stoler på ReviNord for å
+          holde revisjonen på sporet—stille, konsekvent og uten støy.
         </p>
 
         <Link href="/dashboard" className="rn-btn-primary" style={{ fontSize: 16, padding: "15px 36px" }}>
-          Start for free today
+          Start gratis i dag
           <ArrowRight size={18} />
         </Link>
 
@@ -1545,7 +1399,7 @@ function CTASection() {
             marginTop: 16,
           }}
         >
-          No credit card required · Cancel anytime
+          Ingen kredittkort nødvendig · Gratis for alltid
         </p>
       </div>
     </section>
@@ -1614,11 +1468,10 @@ function Footer() {
             style={{ display: "flex", gap: 28, flexWrap: "wrap" }}
           >
             {[
-              { label: "Features", href: "#how-it-works" },
-              { label: "Pricing", href: "#pricing" },
-              { label: "Privacy", href: "#" },
-              { label: "Terms", href: "#" },
-              { label: "Contact", href: "mailto:hello@revinord.app" },
+              { label: "Funksjoner", href: "#slik-fungerer-det" },
+              { label: "Personvern", href: "#" },
+              { label: "Vilkår", href: "#" },
+              { label: "Kontakt", href: "mailto:hei@revinord.app" },
             ].map((l) => (
               <a
                 key={l.label}
@@ -1655,7 +1508,7 @@ function Footer() {
               color: "var(--rn-charcoal-muted)",
             }}
           >
-            © 2025 ReviNord. Crafted with care for students.
+            © 2025 ReviNord. Laget med omsorg for studenter.
           </p>
 
           {/* Supabase badge */}
@@ -1682,7 +1535,7 @@ function Footer() {
             >
               <Database size={10} color="white" />
             </div>
-            Powered by Supabase
+            Drevet av Supabase
           </div>
         </div>
       </div>
@@ -1714,7 +1567,7 @@ export default function LandingPage() {
       <hr className="rn-divider" />
       <TrustSection />
       <hr className="rn-divider" />
-      <PricingSection />
+      <FreeSection />
       <hr className="rn-divider" />
       <CTASection />
       <Footer />

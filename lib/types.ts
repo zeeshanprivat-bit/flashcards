@@ -1,3 +1,44 @@
+// ── ReviNord: Topic revision types ─────────────────────────────────────────
+
+export type TopicStatus = 'fresh' | 'on-track' | 'due-soon' | 'overdue' | 'new';
+
+export interface Topic {
+  id: string;
+  user_id: string;
+  name: string;
+  ease_factor: number;
+  interval: number;
+  repetitions: number;
+  lapses: number;
+  due_date: string;
+  last_revised_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TopicWithStatus extends Topic {
+  status: TopicStatus;
+  daysAgo: number | null;
+  dueIn: number | null;
+  daysLate: number | null;
+  progressPct: number;
+}
+
+export interface Revision {
+  id: string;
+  topic_id: string;
+  user_id: string;
+  revised_at: string;
+  notes: string | null;
+  ease_before: number | null;
+  ease_after: number | null;
+  interval_before: number | null;
+  interval_after: number | null;
+  due_date_after: string | null;
+}
+
+// ── Legacy flashcard types ──────────────────────────────────────────────────
+
 export interface Deck {
   id: string;
   user_id: string;

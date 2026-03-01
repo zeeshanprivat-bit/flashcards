@@ -1,225 +1,558 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Brain, BookOpen, Clock, CheckCircle2, Flame } from 'lucide-react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import DeckCard from '@/components/DeckCard';
-import { Button } from '@/components/ui/button';
+import {
+  Plus, Trash2, CheckCircle2, Clock, AlertTriangle, Circle,
+  ChevronRight, BookOpen, RefreshCw, LogOut, Settings
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import type { Deck } from '@/lib/types';
+import { STATUS_META, getDueLabel, getLastRevisedLabel } from '@/lib/revision';
+import type { TopicWithStatus, TopicStatus } from '@/lib/types';
 
-interface Props {
-  decks: Deck[];
-  email?: string;
+// ── Tiny sub-components ────────────────────────────────────────────────────
+
+function ProgressRing({ pct, color, size = 40 }: { pct: number; color: string; size?: number }) {
+  const sw = 2.5;
+  const r = (size - sw * 2) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - Math.min(Math.max(pct, 0), 1));
+  return (
+    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--rn-linen)" strokeWidth={sw} />
+      <circle
+        cx={size / 2} cy={size / 2} r={r} fill="none"
+        stroke={color} strokeWidth={sw}
+        strokeDasharray={circ} strokeDashoffset={offset}
+        strokeLinecap="round"
+        style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+      />
+    </svg>
+  );
 }
 
-export default function DashboardClient({ decks: initialDecks, email }: Props) {
-  const [decks, setDecks] = useState<Deck[]>(initialDecks);
+function StatusIcon({ status }: { status: TopicStatus }) {
+  const color = STATUS_META[status].color;
+  const props = { size: 14, style: { color } };
+  switch (status) {
+    case 'overdue': return <AlertTriangle {...props} />;
+    case 'due-soon': return <Clock {...props} />;
+    case 'on-track': return <CheckCircle2 {...props} />;
+    case 'fresh': return <CheckCircle2 {...props} />;
+    default: return <Circle {...props} />;
+  }
+}
+
+// ── Topic card ─────────────────────────────────────────────────────────────
+
+function TopicCard({
+  topic,
+  onRevise,
+  onDelete,
+  revising,
+}: {
+  topic: TopicWithStatus;
+  onRevise: (id: string) => void;
+  onDelete: (id: string) => void;
+  revising: boolean;
+}) {
+  const meta = STATUS_META[topic.status];
+
+  return (
+    <div
+      style={{
+        background: 'white',
+        border: '1.5px solid var(--rn-linen)',
+        borderRadius: 16,
+        padding: '16px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        boxShadow: 'var(--rn-shadow-xs)',
+        transition: 'box-shadow 0.18s ease, border-color 0.18s ease',
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLElement).style.boxShadow = 'var(--rn-shadow-md)';
+        (e.currentTarget as HTMLElement).style.borderColor = 'var(--rn-linen-dark)';
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLElement).style.boxShadow = 'var(--rn-shadow-xs)';
+        (e.currentTarget as HTMLElement).style.borderColor = 'var(--rn-linen)';
+      }}
+    >
+      {/* Progress ring */}
+      <ProgressRing pct={topic.progressPct} color={meta.color} size={40} />
+
+      {/* Body */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <Link
+          href={`/topics/${topic.id}`}
+          style={{
+            fontWeight: 600,
+            fontSize: 15,
+            color: 'var(--rn-charcoal)',
+            textDecoration: 'none',
+            display: 'block',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            fontFamily: 'var(--font-inter)',
+          }}
+        >
+          {topic.name}
+        </Link>
+        <span style={{ fontSize: 12, color: 'var(--rn-charcoal-muted)', fontFamily: 'var(--font-inter)' }}>
+          {getLastRevisedLabel(topic)}
+        </span>
+      </div>
+
+      {/* Status pill */}
+      <span
+        className="rn-pill"
+        style={{ background: meta.bg, color: meta.color, flexShrink: 0, fontSize: 12 }}
+      >
+        <StatusIcon status={topic.status} />
+        {getDueLabel(topic)}
+      </span>
+
+      {/* Actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <button
+          onClick={() => onRevise(topic.id)}
+          disabled={revising}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 14px',
+            borderRadius: 9,
+            border: 'none',
+            background: revising ? 'var(--rn-linen)' : 'var(--rn-terracotta)',
+            color: revising ? 'var(--rn-charcoal-muted)' : 'white',
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: revising ? 'default' : 'pointer',
+            fontFamily: 'var(--font-inter)',
+            transition: 'all 0.18s ease',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {revising
+            ? <RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }} />
+            : <CheckCircle2 size={13} />}
+          {revising ? 'Logger…' : 'Logg revisjon'}
+        </button>
+
+        <Link
+          href={`/topics/${topic.id}`}
+          title="View topic"
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 9,
+            border: '1.5px solid var(--rn-linen)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--rn-charcoal-light)',
+            transition: 'all 0.15s ease',
+            flexShrink: 0,
+            textDecoration: 'none',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = 'var(--rn-cream-dark)';
+            (e.currentTarget as HTMLElement).style.color = 'var(--rn-charcoal)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = 'transparent';
+            (e.currentTarget as HTMLElement).style.color = 'var(--rn-charcoal-light)';
+          }}
+        >
+          <ChevronRight size={15} />
+        </Link>
+
+        <button
+          onClick={() => onDelete(topic.id)}
+          title="Delete topic"
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 9,
+            border: '1.5px solid var(--rn-linen)',
+            background: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--rn-charcoal-muted)',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            flexShrink: 0,
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = 'var(--rn-overdue-bg)';
+            (e.currentTarget as HTMLElement).style.color = 'var(--rn-overdue)';
+            (e.currentTarget as HTMLElement).style.borderColor = '#D8B8B8';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = 'transparent';
+            (e.currentTarget as HTMLElement).style.color = 'var(--rn-charcoal-muted)';
+            (e.currentTarget as HTMLElement).style.borderColor = 'var(--rn-linen)';
+          }}
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Group config ───────────────────────────────────────────────────────────
+
+const GROUP_ORDER: TopicStatus[] = ['overdue', 'due-soon', 'on-track', 'fresh', 'new'];
+const GROUP_LABELS: Record<TopicStatus, string> = {
+  overdue: 'Forfalt',
+  'due-soon': 'Forfaller snart',
+  'on-track': 'På sporet',
+  fresh: 'Fersk',
+  new: 'Ikke startet',
+};
+
+// ── Main dashboard ─────────────────────────────────────────────────────────
+
+export default function DashboardClient({
+  topics: initial,
+  email,
+}: {
+  topics: TopicWithStatus[];
+  email: string;
+}) {
+  const [topics, setTopics] = useState<TopicWithStatus[]>(initial);
+  const [newName, setNewName] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [revisiting, setRevisiting] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
 
-  async function handleDelete(id: string) {
-    if (!confirm('Slette denne kortstokken og alle kort? Dette kan ikke angres.')) return;
-    await supabase.from('decks').delete().eq('id', id);
-    setDecks((prev) => prev.filter((d) => d.id !== id));
-  }
+  // ── Stats ──────────────────────────────────────────────────────────────
+  const overdue = topics.filter(t => t.status === 'overdue').length;
+  const dueSoon = topics.filter(t => t.status === 'due-soon').length;
+  const onTrack = topics.filter(t => t.status === 'on-track' || t.status === 'fresh').length;
+  const urgent = overdue + dueSoon;
 
-  const totalDue = decks.reduce((sum, d) => sum + (d.due_count ?? 0), 0);
-  const totalCards = decks.reduce((sum, d) => sum + (d.card_count ?? 0), 0);
-  const decksWithDue = decks.filter((d) => (d.due_count ?? 0) > 0);
-  const topDueDeck = decksWithDue.sort((a, b) => (b.due_count ?? 0) - (a.due_count ?? 0))[0];
-  const allCaughtUp = decks.length > 0 && totalDue === 0 && totalCards > 0;
+  // ── Add topic ──────────────────────────────────────────────────────────
+  const handleAdd = useCallback(async () => {
+    const name = newName.trim();
+    if (!name) return;
+    setAdding(true);
+    try {
+      const res = await fetch('/api/topics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) return;
+      const topic = await res.json();
+      const withStatus: TopicWithStatus = {
+        ...topic,
+        status: 'new' as TopicStatus,
+        daysAgo: null,
+        dueIn: null,
+        daysLate: null,
+        progressPct: 0,
+      };
+      setTopics(prev => [...prev, withStatus]);
+      setNewName('');
+      inputRef.current?.focus();
+    } finally {
+      setAdding(false);
+    }
+  }, [newName]);
+
+  // ── Log revision ───────────────────────────────────────────────────────
+  const handleRevise = useCallback(async (id: string) => {
+    setRevisiting(id);
+    try {
+      const res = await fetch(`/api/topics/${id}/revise`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      });
+      if (!res.ok) return;
+      const updated = await res.json();
+      setTopics(prev => prev.map(t => {
+        if (t.id !== id) return t;
+        const interval = updated.interval ?? 1;
+        return {
+          ...t,
+          ...updated,
+          status: 'fresh' as TopicStatus,
+          daysAgo: 0,
+          dueIn: interval,
+          daysLate: null,
+          progressPct: 0.05,
+        };
+      }));
+    } finally {
+      setRevisiting(null);
+    }
+  }, []);
+
+  // ── Delete topic ───────────────────────────────────────────────────────
+  const handleDelete = useCallback(async (id: string) => {
+    if (!confirm('Slette dette emnet? Revisjonshistorikken vil også fjernes.')) return;
+    await fetch(`/api/topics/${id}`, { method: 'DELETE' });
+    setTopics(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  // ── Sign out ───────────────────────────────────────────────────────────
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+  };
+
+  // ── Group topics ───────────────────────────────────────────────────────
+  const grouped = GROUP_ORDER.reduce<Record<string, TopicWithStatus[]>>((acc, s) => {
+    acc[s] = topics.filter(t => t.status === s);
+    return acc;
+  }, {} as Record<string, TopicWithStatus[]>);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar email={email} />
+    <div style={{ minHeight: '100vh', background: 'var(--rn-cream)', fontFamily: 'var(--font-inter)' }}>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Velkommen tilbake!</h1>
-          <p className="text-slate-600 mt-1">Klar til å fortsette læringsreisen din?</p>
+      {/* ── Nav ──────────────────────────────────────────────────────────── */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 50,
+        background: 'rgba(247,244,239,0.88)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--rn-linen)',
+        padding: '0 24px',
+        height: 60,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 20, fontFamily: 'var(--font-lora)', fontWeight: 700, color: 'var(--rn-charcoal)', letterSpacing: '-0.01em' }}>
+            ReviNord
+          </span>
+          {email && (
+            <span style={{ fontSize: 12, color: 'var(--rn-charcoal-muted)', paddingTop: 1, display: 'none' }} className="sm:block">
+              {email}
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Link
+            href="/settings"
+            style={{
+              width: 36, height: 36, borderRadius: 9,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--rn-charcoal-light)',
+              border: '1.5px solid var(--rn-linen)',
+              background: 'white',
+              textDecoration: 'none',
+            }}
+            title="Innstillinger"
+          >
+            <Settings size={15} />
+          </Link>
+          <button
+            onClick={handleSignOut}
+            title="Logg ut"
+            style={{
+              width: 36, height: 36, borderRadius: 9,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--rn-charcoal-light)',
+              border: '1.5px solid var(--rn-linen)',
+              background: 'white',
+              cursor: 'pointer',
+            }}
+          >
+            <LogOut size={15} />
+          </button>
+        </div>
+      </nav>
+
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 80px' }}>
+
+        {/* ── Header ────────────────────────────────────────────────────── */}
+        <div style={{ marginBottom: 36 }}>
+          <h1 style={{
+            fontFamily: 'var(--font-lora)',
+            fontSize: 30,
+            fontWeight: 700,
+            color: 'var(--rn-charcoal)',
+            margin: 0,
+            lineHeight: 1.25,
+          }}>
+            Dine revisjonsemner
+          </h1>
+          <p style={{ color: 'var(--rn-charcoal-light)', marginTop: 8, fontSize: 15, lineHeight: 1.5 }}>
+            {topics.length === 0
+              ? 'Legg til ditt første emne nedenfor for å starte.'
+              : urgent > 0
+                ? `${urgent} emne${urgent === 1 ? '' : 'r'} trenger oppmerksomhet · ${onTrack} på sporet`
+                : `Alle ${onTrack} emne${onTrack === 1 ? '' : 'r'} på sporet — godt arbeid.`}
+          </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-blue-600" />
-              </div>
-              <span className="text-2xl font-bold text-slate-900">{decks.length}</span>
-            </div>
-            <h3 className="text-sm font-medium text-slate-700">Kortstokker</h3>
-            <p className="text-xs text-slate-500">Totalt antall</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              </div>
-              <span className="text-2xl font-bold text-slate-900">{totalCards}</span>
-            </div>
-            <h3 className="text-sm font-medium text-slate-700">Totalt kort</h3>
-            <p className="text-xs text-slate-500">I alle kortstokker</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-amber-600" />
-              </div>
-              <span className="text-2xl font-bold text-slate-900">{totalDue}</span>
-            </div>
-            <h3 className="text-sm font-medium text-slate-700">Klar for repetisjon</h3>
-            <p className="text-xs text-slate-500">Kort som forfaller i dag</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                <Flame className="w-5 h-5 text-indigo-600" />
-              </div>
-              <span className="text-2xl font-bold text-slate-900">{decksWithDue.length}</span>
-            </div>
-            <h3 className="text-sm font-medium text-slate-700">Aktive kortstokker</h3>
-            <p className="text-xs text-slate-500">Med forfallende kort</p>
-          </div>
-        </div>
-
-        {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-1">Opprett ny kortstokk</h3>
-                <p className="text-slate-600 text-sm">Start med AI-genererte flashcards</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Plus className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-            <Link href="/decks/new">
-              <Button className="w-full bg-blue-600 text-white hover:bg-blue-700 font-medium">
-                Opprett kortstokk
-              </Button>
-            </Link>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-1">Start økt</h3>
-                <p className="text-slate-600 text-sm">Repetisjon med mellomrom</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center">
-                <Brain className="w-6 h-6 text-indigo-600" />
-              </div>
-            </div>
-            <Link href="/study">
-              <Button className="w-full bg-indigo-600 text-white hover:bg-indigo-700 font-medium">
-                Start økt
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Priority Alert */}
-        {totalDue > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-amber-600" />
+        {/* ── Stats bar ─────────────────────────────────────────────────── */}
+        {topics.length > 0 && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 12,
+            marginBottom: 32,
+          }}>
+            {[
+              { label: 'Forfalt', count: overdue, color: 'var(--rn-overdue)', bg: 'var(--rn-overdue-bg)' },
+              { label: 'Forfaller snart', count: dueSoon, color: 'var(--rn-terracotta)', bg: 'var(--rn-terracotta-bg)' },
+              { label: 'På sporet', count: onTrack, color: 'var(--rn-sage)', bg: 'var(--rn-sage-bg)' },
+            ].map(({ label, count, color, bg }) => (
+              <div
+                key={label}
+                style={{
+                  background: count > 0 ? bg : 'white',
+                  border: `1.5px solid ${count > 0 ? color + '44' : 'var(--rn-linen)'}`,
+                  borderRadius: 14,
+                  padding: '16px 20px',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: 26, fontWeight: 700, color: count > 0 ? color : 'var(--rn-charcoal-muted)', fontFamily: 'var(--font-lora)', lineHeight: 1 }}>
+                  {count}
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">{totalDue} kort forfaller</h3>
-                  <p className="text-sm text-slate-600">{decksWithDue.length} kortstokk{decksWithDue.length !== 1 ? 'er' : ''} å repetere</p>
-                </div>
+                <div style={{ fontSize: 12, color: 'var(--rn-charcoal-muted)', marginTop: 4 }}>{label}</div>
               </div>
-              <Link href="/study">
-                <Button className="bg-amber-600 text-white hover:bg-amber-700">
-                  Start økt
-                </Button>
-              </Link>
-            </div>
+            ))}
           </div>
         )}
 
-        {/* Decks Section */}
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">
-              {decks.length === 0 ? 'Kom i gang' : 'Dine kortstokker'}
-            </h2>
-            {decks.length > 0 && (
-              <span className="text-sm text-slate-500">{decks.length} kortstokker</span>
-            )}
-          </div>
-
-          {/* Empty State */}
-          {decks.length === 0 && (
-            <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-slate-300">
-              <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8 text-slate-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">Ingen kortstokker ennå</h3>
-              <p className="text-slate-600 mb-6 max-w-md mx-auto">Opprett din første kortstokk for å begynne å lære med AI-genererte flashcards</p>
-              <Link href="/decks/new">
-                <Button className="bg-blue-600 text-white hover:bg-blue-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Opprett kortstokk
-                </Button>
-              </Link>
-            </div>
-          )}
-
-          {/* Deck Grid */}
-          {decks.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {decks.map((deck) => (
-                <div key={deck.id} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-900 mb-1">{deck.title}</h3>
-                      <p className="text-sm text-slate-500">{deck.card_count} kort</p>
-                    </div>
-                    {(deck.due_count ?? 0) > 0 && (
-                      <div className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full font-medium">
-                        {deck.due_count} forfaller
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Link href={`/study/${deck.id}`} className="flex-1">
-                      <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
-                        Studer
-                      </Button>
-                    </Link>
-                    <Link href={`/decks/${deck.id}`}>
-                      <Button variant="outline" size="sm" className="border-slate-300">
-                        Åpne
-                      </Button>
-                    </Link>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleDelete(deck.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      Slett
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        {/* ── Add topic input ────────────────────────────────────────────── */}
+        <div style={{
+          display: 'flex',
+          gap: 0,
+          marginBottom: 40,
+          background: 'white',
+          border: '1.5px solid var(--rn-linen)',
+          borderRadius: 14,
+          padding: '8px 8px 8px 18px',
+          boxShadow: 'var(--rn-shadow-sm)',
+          alignItems: 'center',
+        }}>
+          <Plus size={15} style={{ color: 'var(--rn-charcoal-muted)', flexShrink: 0, marginRight: 10 }} />
+          <input
+            ref={inputRef}
+            type="text"
+            value={newName}
+            onChange={e => setNewName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && !adding && handleAdd()}
+            placeholder="Legg til et emne, f.eks. Kardiologisk farmakologi…"
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontSize: 15,
+              color: 'var(--rn-charcoal)',
+              fontFamily: 'var(--font-inter)',
+              minWidth: 0,
+            }}
+          />
+          <button
+            onClick={handleAdd}
+            disabled={!newName.trim() || adding}
+            style={{
+              padding: '10px 18px',
+              borderRadius: 10,
+              border: 'none',
+              background: newName.trim() && !adding ? 'var(--rn-terracotta)' : 'var(--rn-linen)',
+              color: newName.trim() && !adding ? 'white' : 'var(--rn-charcoal-muted)',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: newName.trim() && !adding ? 'pointer' : 'default',
+              fontFamily: 'var(--font-inter)',
+              transition: 'all 0.18s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            <Plus size={14} />
+            Legg til
+          </button>
         </div>
-      </main>
+
+        {/* ── Topic groups ───────────────────────────────────────────────── */}
+        {topics.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '72px 0',
+            color: 'var(--rn-charcoal-muted)',
+          }}>
+            <BookOpen size={38} style={{ margin: '0 auto 16px', opacity: 0.3, display: 'block' }} />
+            <p style={{ fontSize: 16, fontFamily: 'var(--font-lora)', color: 'var(--rn-charcoal-light)', margin: '0 0 6px' }}>
+              Revisjonssporeren din er tom
+            </p>
+            <p style={{ fontSize: 14, margin: 0 }}>
+              Legg til et emne ovenfor for å starte timeplanen din.
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
+            {GROUP_ORDER.filter(s => (grouped[s]?.length ?? 0) > 0).map(status => (
+              <section key={status}>
+                {/* Group header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 12,
+                }}>
+                  <StatusIcon status={status} />
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: STATUS_META[status].color,
+                    fontFamily: 'var(--font-inter)',
+                  }}>
+                    {GROUP_LABELS[status]}
+                  </span>
+                  <span style={{ fontSize: 11, color: 'var(--rn-charcoal-muted)' }}>
+                    ({grouped[status].length})
+                  </span>
+                  <div style={{ flex: 1, height: 1, background: 'var(--rn-linen)', marginLeft: 4 }} />
+                </div>
+
+                {/* Topic cards */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {grouped[status].map(topic => (
+                    <TopicCard
+                      key={topic.id}
+                      topic={topic}
+                      onRevise={handleRevise}
+                      onDelete={handleDelete}
+                      revising={revisiting === topic.id}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 }
