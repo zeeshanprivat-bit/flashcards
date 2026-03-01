@@ -231,6 +231,7 @@ export default function DashboardClient({
   const [newName, setNewName] = useState('');
   const [adding, setAdding] = useState(false);
   const [revisiting, setRevisiting] = useState<string | null>(null);
+  const [apiError, setApiError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -246,16 +247,20 @@ export default function DashboardClient({
     const name = newName.trim();
     if (!name) return;
     setAdding(true);
+    setApiError('');
     try {
       const res = await fetch('/api/topics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       });
-      if (!res.ok) return;
-      const topic = await res.json();
+      const data = await res.json();
+      if (!res.ok) {
+        setApiError(data.error ?? 'Noe gikk galt. Prøv igjen.');
+        return;
+      }
       const withStatus: TopicWithStatus = {
-        ...topic,
+        ...data,
         status: 'new' as TopicStatus,
         daysAgo: null,
         dueIn: null,
@@ -265,6 +270,8 @@ export default function DashboardClient({
       setTopics(prev => [...prev, withStatus]);
       setNewName('');
       inputRef.current?.focus();
+    } catch {
+      setApiError('Nettverksfeil. Er du koblet til internett?');
     } finally {
       setAdding(false);
     }
@@ -488,6 +495,25 @@ export default function DashboardClient({
             Legg til
           </button>
         </div>
+
+        {/* ── API error ─────────────────────────────────────────────────── */}
+        {apiError && (
+          <div style={{
+            background: 'var(--rn-overdue-bg)',
+            border: '1.5px solid #D8B8B8',
+            borderRadius: 12,
+            padding: '12px 16px',
+            fontSize: 13,
+            color: 'var(--rn-overdue)',
+            marginBottom: 8,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <span>{apiError}</span>
+            <button onClick={() => setApiError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--rn-overdue)', fontSize: 16, lineHeight: 1 }}>×</button>
+          </div>
+        )}
 
         {/* ── Topic groups ───────────────────────────────────────────────── */}
         {topics.length === 0 ? (
